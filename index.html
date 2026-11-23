@@ -1589,6 +1589,7 @@
         linear-gradient(180deg, #93cbc6 0%, #74b4b5 45%, #5c9ea7 100%);
       box-shadow: 0 0 0 3px var(--jin), 0 0 0 6px #fff3d6, 0 0 0 8px var(--zhu), 0 12px 24px rgba(60,40,20,0.22);
     }
+    .fish-pond.shaking { will-change: transform; }
     .pond-far { position: absolute; left: 0; right: 0; top: 0; height: 22%; pointer-events: none; z-index: 1; }
     .pond-far svg { position: absolute; display: block; }
     .pond-far .far-band { left: 0; top: 0; width: 100%; height: 100%; }
@@ -3737,6 +3738,7 @@
     clearHintRing();
     if (fishRaf) cancelAnimationFrame(fishRaf);
     fishRaf = 0;
+    stopShake();
     fishPhase = "off";
     fishHolding = false;
     fishAim = null;
@@ -3856,8 +3858,10 @@
     var tip = rodTip();
     var base = rodBase();
     var tight = fishPhase === "fight";
-    var cx = base.x + (tip.x - base.x) * 0.5 + (tight ? 12 : 6);
+    var wg = tight ? shakeWiggle(47) : 0;
+    var cx = base.x + (tip.x - base.x) * 0.5 + (tight ? 12 : 6) + wg * 0.6;
     var cy = base.y + (tip.y - base.y) * 0.5 + (tight ? 16 : 4);
+    if (wg) { tip = { x: tip.x + wg * 0.5, y: tip.y + Math.abs(wg) * 0.25 }; }
     var rod = "M" + base.x.toFixed(1) + " " + base.y.toFixed(1) + " Q" + cx.toFixed(1) + " " + cy.toFixed(1) + " " + tip.x.toFixed(1) + " " + tip.y.toFixed(1);
     fishEl("fish-rod").setAttribute("d", rod);
     fishEl("fish-rod-shadow").setAttribute("d", rod);
@@ -3865,7 +3869,8 @@
     if (fishBobber) {
       var bx = fishBobber.x, by = fishBobber.y - 12 * fishScale;
       var sag = fishPhase === "fight" || fishPhase === "pull" ? 0 : fishPhase === "tired" ? 10 : (fishCast || fishRecall) ? 8 : 26;
-      str.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " Q" + ((tip.x + bx) / 2).toFixed(1) + " " + (Math.max(tip.y, by) + sag).toFixed(1) + " " + bx.toFixed(1) + " " + by.toFixed(1));
+      var sw = tight ? shakeWiggle(61) * 1.3 : 0;
+      str.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " Q" + ((tip.x + bx) / 2 + sw).toFixed(1) + " " + (Math.max(tip.y, by) + sag + sw * 0.4).toFixed(1) + " " + bx.toFixed(1) + " " + by.toFixed(1));
       hook.setAttribute("d", "");
     } else {
       str.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " L" + (tip.x + 2).toFixed(1) + " " + (tip.y + 34).toFixed(1));
@@ -4200,6 +4205,7 @@
   }
 
   function setFishPhase(p) {
+    if (p !== "fight") stopShake();
     fishPhase = p;
     var pond = fishEl("fish-pond");
     if (pond) pond.setAttribute("data-phase", p);
@@ -4400,6 +4406,134 @@
     gold:  { speed: 80, drain: 0.23, rise: 0.22, turn: [1.2, 2.4] },
     star:  { speed: 118, drain: 0.15, rise: 0.27, turn: [1.0, 2.0] }
   };
+  /* ---- 遛鱼手感：水面/鱼竿/鱼线轻轻抖动 + “嗡嗡”拉线声 + 鱼转向时“滋滋”放线声（代替 iPhone 震动） ---- */
+  var fishShake = { on: false, t: 0, burst: 0, amp: 0, wig: 0 };
+  var strainSnd = null;
+  function fxSoundOn() {
+    // 游戏没有单独的静音开关；页面在后台或没有 WebAudio 时不出声（iPhone 静音键也会让它静音）
+    if (document.hidden) return false;
+    if (state && state.sound === false) return false;
+    return !!(window.AudioContext || window.webkitAudioContext);
+  }
+  function startStrainSound() {
+    if (strainSnd || !fxSoundOn()) return;
+    try {
+      var ctx = getAudio();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var out = ctx.createGain();
+      out.gain.setValueAtTime(0.0001, now);
+      out.gain.exponentialRampToValueAtTime(0.02, now + 0.15);
+      var lp = ctx.createBiquadFilter();
+      lp.type = "lowpass"; lp.frequency.value = 520; lp.Q.value = 3;
+      var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+      o1.type = "sawtooth"; o2.type = "triangle";
+      o1.frequency.value = 78; o2.frequency.value = 79.5;
+      // “嗡嗡”：用低频颤音让声音一抖一抖
+      var trem = ctx.createGain(); trem.gain.value = 0.7;
+      var lfo = ctx.createOscillator(), lfoG = ctx.createGain();
+      lfo.type = "sine"; lfo.frequency.value = 7; lfoG.gain.value = 0.3;
+      lfo.connect(lfoG); lfoG.connect(trem.gain);
+      o1.connect(lp); o2.connect(lp); lp.connect(trem); trem.connect(out); out.connect(ctx.destination);
+      o1.start(now); o2.start(now); lfo.start(now);
+      strainSnd = { ctx: ctx, out: out, lp: lp, o1: o1, o2: o2, lfo: lfo };
+    } catch (e) { strainSnd = null; }
+  }
+  function updateStrainSound(tension, burst) {
+    if (!strainSnd) return;
+    if (!fxSoundOn()) { stopStrainSound(); return; }
+    try {
+      var s = strainSnd, now = s.ctx.currentTime, k = Math.max(0, Math.min(1, tension));
+      var f = 72 + 110 * k + 25 * burst;
+      s.o1.frequency.setTargetAtTime(f, now, 0.08);
+      s.o2.frequency.setTargetAtTime(f * 1.02, now, 0.08);
+      s.lp.frequency.setTargetAtTime(420 + 900 * k + 300 * burst, now, 0.08);
+      s.lfo.frequency.setTargetAtTime(6 + 8 * k, now, 0.1);
+      s.out.gain.setTargetAtTime(0.018 + 0.05 * k + 0.02 * burst, now, 0.08);
+    } catch (e) {}
+  }
+  function stopStrainSound() {
+    var s = strainSnd;
+    strainSnd = null;
+    if (!s) return;
+    try {
+      var now = s.ctx.currentTime;
+      s.out.gain.cancelScheduledValues(now);
+      s.out.gain.setValueAtTime(Math.max(0.0001, s.out.gain.value), now);
+      s.out.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+      [s.o1, s.o2, s.lfo].forEach(function (o) { try { o.stop(now + 0.15); } catch (e) {} });
+      setTimeout(function () { try { s.out.disconnect(); } catch (e) {} }, 300);
+    } catch (e) {}
+  }
+  function dragZip(tension) {
+    // 鱼一转向：渔轮“滋滋滋”放线
+    if (!fxSoundOn()) return;
+    try {
+      var ctx = getAudio();
+      if (!ctx) return;
+      var dur = 0.38, now = ctx.currentTime;
+      var buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+      var d = buf.getChannelData(0), rate = 34 + 20 * tension, sr = ctx.sampleRate;
+      for (var i = 0; i < d.length; i++) {
+        var ph = (i / sr * rate) % 1;           // 一连串小“咔”
+        d[i] = (Math.random() * 2 - 1) * (ph < 0.22 ? 1 : 0.12);
+      }
+      var src = ctx.createBufferSource(); src.buffer = buf;
+      var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 2200 + 1200 * tension; bp.Q.value = 2.5;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(0.07 + 0.05 * tension, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      src.start(now); src.stop(now + dur + 0.02);
+    } catch (e) {}
+  }
+  function startShake() {
+    fishShake.on = true; fishShake.t = 0; fishShake.burst = 0.6; fishShake.amp = 0; fishShake.wig = 0;
+    var pond = fishEl("fish-pond");
+    if (pond) pond.classList.add("shaking");
+    startStrainSound();
+  }
+  function shakeBurst() {
+    fishShake.burst = 1;
+    var r = fishReel;
+    dragZip(r ? r.tension : 0.3);
+  }
+  function tickShake(dt, tension) {
+    var s = fishShake;
+    if (!s.on) return;
+    s.t += dt;
+    s.burst = Math.max(0, s.burst - dt * 2.4);
+    var k = Math.max(0, Math.min(1, tension));
+    // 轻：平时 1~3px，转向时最多 ~6px；减少动态效果时只留三成
+    var amp = (1 + 2.6 * k + 3 * s.burst) * (fishReduce ? 0.3 : 1);
+    s.amp = amp;
+    s.wig = (2 + 6 * k + 7 * s.burst) * fishScale * (fishReduce ? 0.3 : 1);
+    var t = s.t;
+    var dx = amp * (0.6 * Math.sin(t * 37) + 0.4 * Math.sin(t * 23 + 1.3));
+    var dy = amp * 0.45 * (0.6 * Math.sin(t * 31 + 0.7) + 0.4 * Math.sin(t * 19));
+    var pond = fishEl("fish-pond"), kid = fishEl("fish-kid");
+    if (pond) pond.style.transform = "translate(" + dx.toFixed(2) + "px," + dy.toFixed(2) + "px)";
+    if (kid) kid.style.transform = "translateX(-50%) translateX(" + (amp * 0.5 * Math.sin(t * 41)).toFixed(2) + "px) rotate(" + (amp * 0.25 * Math.sin(t * 29)).toFixed(2) + "deg)";
+    var ui = fishEl("reel-ui");
+    if (ui) ui.setAttribute("data-shake", amp.toFixed(2));
+    updateStrainSound(k, s.burst);
+  }
+  function shakeWiggle(phase) {
+    // 鱼竿/鱼线的抖动偏移（drawLine 用）
+    if (!fishShake.on) return 0;
+    return fishShake.wig * Math.sin(fishShake.t * (phase || 47));
+  }
+  function stopShake() {
+    var was = fishShake.on;
+    fishShake.on = false; fishShake.burst = 0; fishShake.amp = 0; fishShake.wig = 0;
+    stopStrainSound();
+    if (!was) return;
+    var pond = fishEl("fish-pond"), kid = fishEl("fish-kid"), ui = fishEl("reel-ui");
+    if (pond) { pond.style.transform = ""; pond.classList.remove("shaking"); }
+    if (kid) kid.style.transform = "";
+    if (ui) ui.removeAttribute("data-shake");
+  }
   function hookFish() {
     clearFishTimers();
     // label 要留到这次点击的 click 发生之后再收起，否则 iPhone 的“嗒”不会响
@@ -4420,6 +4554,7 @@
     var bb = pondBounds();
     fishReel.y0 = Math.max(bb.t + 40, Math.min(bb.t + (bb.b - bb.t) * 0.68, o.y));
     setFishPhase("fight");
+    startShake();
     showReelUI(true);
     var face = fishEl("fight-face");
     if (face) face.innerHTML = fishSvg(o.kind);
@@ -4447,11 +4582,11 @@
       if (r.dragT > 0.8 && !fishSaid.followed) { fishSaid.followed = true; showFollowHand(false); }
     }
     var sp = r.spec.speed * sc * (0.45 + 0.55 * r.stamina) * (fishReduce ? 0.85 : 1);
-    if (r.turnT <= 0) { r.dir *= -1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); haptic("pull"); }
+    if (r.turnT <= 0) { r.dir *= -1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); haptic("pull"); shakeBurst(); }
     o.x += r.dir * sp * dt;
     var lo = b.l + o.w * 0.6, hi = b.r - o.w * 0.6;
-    if (o.x < lo) { o.x = lo; r.dir = 1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); }
-    if (o.x > hi) { o.x = hi; r.dir = -1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); }
+    if (o.x < lo) { o.x = lo; if (r.dir !== 1) shakeBurst(); r.dir = 1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); }
+    if (o.x > hi) { o.x = hi; if (r.dir !== -1) shakeBurst(); r.dir = -1; r.turnT = rand(r.spec.turn[0], r.spec.turn[1]); }
     var ty = Math.max(b.t + 20, Math.min(b.b - 30, r.y0 + Math.sin(r.t * 1.3) * 18 * sc));
     o.y += (ty - o.y) * Math.min(1, dt * 2);
     o.dir = r.dir;
@@ -4472,6 +4607,7 @@
     if (r.trailT <= 0 && !fishReduce) { ripple(o.x - o.dir * o.w * 0.5, o.y + 4); r.trailT = 0.3; }
     r.strainT -= dt;
     if (r.tension > 0.75 && r.strainT <= 0) { haptic("strain"); r.strainT = 0.7; }
+    tickShake(dt, Math.max(r.tension, 0.15));
     updateFightUI();
     if (r.stamina <= 0) becomeTired();
     else if (r.tension >= 1) fishEscape();
@@ -4599,6 +4735,7 @@
     fishMisses++;
     var o = fishReel && fishReel.o;
     fishReel = null;
+    stopShake();
     showReelUI(false);
     if (o) { o.el.classList.remove("tired", "fighting"); var sw = o.el.querySelector(".fish-sweat"); if (sw) sw.remove(); }
     sendBiterAway(true);
@@ -5341,6 +5478,20 @@
   }
 
   /* ===== Init ===== */
+  // iPhone/iPad：AudioContext 只能在用户点按时恢复；每次点按都顺手唤醒一下（被来电/切后台打断后也能恢复）
+  function wakeAudio() {
+    if (!audioCtx) return;
+    if (audioCtx.state === "suspended" || audioCtx.state === "interrupted") { try { audioCtx.resume(); } catch (e) {} }
+  }
+  ["touchend", "pointerup", "click", "keydown"].forEach(function (ev) { document.addEventListener(ev, wakeAudio, true); });
+  // 切到后台 / 关页面：拉线声和抖动立刻停
+  function onPageHidden() {
+    if (document.hidden) { stopShake(); }
+    else if (fishShake && fishPhase === "fight" && fishReel) { startShake(); }
+  }
+  document.addEventListener("visibilitychange", onPageHidden);
+  window.addEventListener("pagehide", function () { stopShake(); });
+
   function leaveLevel() {
     clearTimeout(petalHintTimer);
     stopFishing();
