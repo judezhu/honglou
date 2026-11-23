@@ -1686,6 +1686,119 @@
       .leaf-cover { transition: opacity 0.3s ease; }
       .cover-surprise { animation-duration: 0.01s !important; }
     }
+
+    /* ---- 怡红院迷宫：雾、钥匙、小门、海棠、星星 ---- */
+    .maze-tip { display: block; font-size: 0.98rem; padding-bottom: 0; text-align: center; line-height: 1.5; }
+    .maze-tip ruby rt { font-size: 0.5em; }
+    .maze-hud { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 0.4rem; padding: 0.25rem 0.5rem 0.1rem; position: relative; z-index: 4; }
+    .mz-chip {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      background: rgba(255,250,238,0.95); border: 2px dashed #d2bf94; border-radius: 999px;
+      padding: 0.1rem 0.6rem 0.1rem 0.35rem; font-size: 0.92rem; font-weight: 700; color: #8a7d66;
+    }
+    .mz-chip .mz-ico { width: 22px; height: 22px; display: inline-block; }
+    .mz-chip .mz-ico svg { width: 100%; height: 100%; display: block; }
+    .key-chip .mz-ico { opacity: 0.4; filter: grayscale(0.6); }
+    .key-chip.held { border: 2px solid var(--jin); color: var(--zhu-deep); background: #fff6dc; box-shadow: 0 0 10px rgba(255,200,90,0.6); }
+    .key-chip.held .mz-ico, .key-chip.used .mz-ico { opacity: 1; filter: none; }
+    .key-chip.used { border: 2px solid #3d7a63; color: #2c5a49; background: #e8f3ea; }
+    .flower-chip { border: 2px solid #f0b4c0; color: #b04a5e; }
+    .star-chip { border: 2px solid var(--jin); color: #8a6a20; }
+    .star-chip small { font-size: 0.75rem; margin-left: 0.3rem; color: #8a7d66; }
+    .mz-star { color: #d8cfbd; font-size: 1.05rem; line-height: 1; }
+    .mz-star.on { color: #f0b429; text-shadow: 0 0 6px rgba(255,200,80,0.8), 0 1px 0 #a07010; }
+
+    .maze-board { --fog: #2c3352; }
+    .maze-board .cell { overflow: visible; }
+    .maze-board .cell::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+      transition: background-color 0.45s ease, opacity 0.45s ease;
+      background-color: transparent;
+    }
+    .maze-board .cell.fog::after { background-color: rgba(44,51,82,0.97); }
+    .maze-board .cell.seen::after { background-color: rgba(214,220,236,0.42); }
+    .maze-board .cell.near::after { background-color: transparent; }
+    .maze-board .cell.box-cell::after { background-color: transparent !important; }
+    .maze-board .cell.box-cell { box-shadow: inset 0 0 0 3px rgba(255,214,110,0.9), 0 0 14px 4px rgba(255,210,110,0.6); z-index: 4; }
+    .maze-board .cell.box-cell .jade-token { z-index: 5; }
+    .mz-item { position: absolute; inset: 6%; z-index: 2; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+    .mz-item svg { width: 100%; height: 100%; display: block; }
+    .mz-key { animation: keyBob 1.6s ease-in-out infinite alternate; filter: drop-shadow(0 0 4px rgba(255,220,120,0.9)); }
+    @keyframes keyBob { from { transform: translateY(-6%) rotate(-8deg); } to { transform: translateY(6%) rotate(8deg); } }
+    .mz-flower { inset: 10%; }
+    .mz-key.picked, .mz-flower.picked { animation: itemPick 0.5s ease forwards; }
+    @keyframes itemPick { to { transform: translateY(-60%) scale(1.4); opacity: 0; } }
+    .mz-gate { inset: 0; }
+    .mz-gate.opening { animation: gateOpen 0.7s cubic-bezier(0.2, 1.4, 0.4, 1); }
+    @keyframes gateOpen { 0% { transform: scale(1); } 40% { transform: scale(1.18); filter: drop-shadow(0 0 10px #ffe39a); } 100% { transform: scale(1); } }
+    .maze-board .cell.hint-step { z-index: 4; }
+    .maze-board .cell.hint-step::before {
+      content: ""; position: absolute; inset: 18%; border-radius: 50%; z-index: 4; pointer-events: none;
+      background: radial-gradient(circle, #fff6c8 0%, #ffd56a 55%, rgba(255,200,80,0) 72%);
+      animation: hintStep 1s ease-in-out var(--hint-delay, 0s) infinite alternate;
+    }
+    @keyframes hintStep { from { transform: scale(0.7); opacity: 0.6; } to { transform: scale(1.1); opacity: 1; } }
+    .maze-board .player-token { z-index: 6; overflow: visible; }
+    .player-token .kid { position: relative; z-index: 2; font-size: calc(var(--cell) * 0.72); line-height: 1; }
+    .player-token .lantern-glow {
+      position: absolute; left: 50%; top: 50%; width: calc(var(--cell) * 4.6); height: calc(var(--cell) * 4.6);
+      transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; z-index: 1;
+      background: radial-gradient(circle, rgba(255,226,150,0.38) 0%, rgba(255,210,120,0.18) 40%, rgba(255,200,110,0) 70%);
+      animation: lanternPulse 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes lanternPulse { from { opacity: 0.8; } to { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } }
+    .firefly {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%; z-index: 5; pointer-events: none;
+      background: #fff6b0; box-shadow: 0 0 8px 3px rgba(255,240,140,0.75);
+      animation: firefly 6s ease-in-out infinite;
+    }
+    @keyframes firefly {
+      0%, 100% { transform: translate(0, 0); opacity: 0.2; }
+      25% { transform: translate(14px, -10px); opacity: 1; }
+      50% { transform: translate(-6px, -22px); opacity: 0.4; }
+      75% { transform: translate(-16px, -6px); opacity: 0.95; }
+    }
+    .maze-stars-card {
+      position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 50% 40%, rgba(60,30,20,0.3), rgba(30,18,10,0.55)); padding: 1rem;
+    }
+    .msc-box {
+      width: min(440px, 100%); text-align: center; padding: 1.2rem 1rem 1.3rem;
+      background: linear-gradient(180deg, #fffcf3, #f6e6c2);
+      border: 4px solid var(--zhu); border-radius: 18px;
+      box-shadow: inset 0 0 0 5px #fffaf0, inset 0 0 0 7px var(--jin), 0 18px 40px rgba(0,0,0,0.3);
+      animation: popIn 0.5s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+    }
+    .msc-box h2 { font-family: var(--title); color: var(--zhu-deep); margin: 0 0 0.3rem; font-size: 1.6rem; }
+    .msc-stars { font-size: 3rem; letter-spacing: 0.15em; margin: 0.2rem 0 0.3rem; }
+    .msc-stars .mz-star { font-size: 3rem; }
+    .msc-stars .mz-star.on { animation: starPop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+    .msc-stars .mz-star.on:nth-child(2) { animation-delay: 0.2s; }
+    .msc-stars .mz-star.on:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes starPop { from { transform: scale(0.2) rotate(-30deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+    .msc-box p { margin: 0.2rem 0 0.8rem; font-size: 1.1rem; color: #4e4232; line-height: 1.5; }
+    .msc-best { color: var(--zhu) !important; font-weight: 700; }
+    /* 横屏平板：方向键放到右边，迷宫更大 */
+    @media (min-width: 700px) and (min-aspect-ratio: 1/1) {
+      #screen-maze .dpad { position: absolute; right: 22px; bottom: 22px; z-index: 5; }
+      #screen-maze .maze-board-wrap { padding-right: 250px; padding-left: 250px; }
+    }
+    /* 手机：方向键小一点，让出位置 */
+    @media (max-width: 520px) {
+      #screen-maze .dpad { grid-template-columns: 62px 62px 62px; grid-template-rows: 58px 58px 58px; gap: 4px; padding-top: 0; }
+      #screen-maze .dpad button { min-width: 58px; min-height: 56px; font-size: 1.5rem; }
+      .maze-tip { font-size: 0.88rem; }
+      #screen-maze .topbar h1 { font-size: 1.15rem; white-space: nowrap; letter-spacing: 0.04em; }
+      .mz-chip { font-size: 0.82rem; padding: 0.05rem 0.45rem 0.05rem 0.25rem; }
+      .mz-chip .mz-ico { width: 18px; height: 18px; }
+      #screen-maze .maze-board-wrap { padding: 0.2rem 2px; }
+      #screen-maze .maze-board { border-width: 3px; border-radius: 6px; box-shadow: 0 0 0 2px var(--jin), 0 8px 16px rgba(90,30,30,0.25); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mz-key, .firefly, .player-token .lantern-glow, .maze-board .cell.hint-step::before, .mz-gate.opening, .msc-stars .mz-star.on { animation: none !important; }
+      .firefly { opacity: 0.6; }
+      .maze-board .cell::after { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -1875,10 +1988,11 @@
   <section id="screen-maze" class="screen">
     <div class="topbar">
       <button type="button" class="icon-btn" id="btn-maze-back">返回</button>
-      <h1><ruby>怡红院<rt>yí hóng yuàn</rt></ruby> · 跟着亮光走</h1>
-      <span style="width:56px"></span>
+      <h1><ruby>怡红院<rt>yí hóng yuàn</rt></ruby> · 雾里找玉盒</h1>
+      <button type="button" class="icon-btn wide" id="btn-maze-hint">提示</button>
     </div>
-    <div class="hud-progress">用下面的箭头走。也可以在迷宫上滑一滑。跟着亮光，走到小玉盒那里。</div>
+    <div class="hud-progress maze-tip">雾里看不清。找钥匙开门，摘<ruby>海棠<rt>hǎi táng</rt></ruby>花，走到小玉盒。</div>
+    <div class="maze-hud" id="maze-hud"></div>
     <div class="maze-board-wrap">
       <div class="maze-board" id="maze-board"></div>
     </div>
@@ -2072,19 +2186,27 @@
     { x: 73, y: 80, cls: "p4" }
   ];
 
-  var MAZE = [
-    [1,1,1,1,1,1,1,1,1],
-    [1,2,0,0,1,0,0,0,1],
-    [1,1,1,0,1,0,1,0,1],
-    [1,0,0,0,0,0,1,0,1],
-    [1,0,1,1,1,1,1,0,1],
-    [1,0,1,0,0,0,0,0,1],
-    [1,0,1,0,1,1,1,1,1],
-    [1,0,0,0,1,0,0,0,1],
-    [1,1,1,0,1,0,1,0,1],
-    [1,0,0,0,0,0,1,0,1],
-    [1,0,1,1,1,1,1,3,1]
+  // # 墙  . 路  S 起点  J 小玉盒  a 红钥匙  A 月亮门(红)  b 金钥匙  B 小木门(金)  f 海棠花
+  var MAZE_MAP = [
+    "#############",
+    "#J..#f......#",
+    "###.###.###.#",
+    "#f#...#...#.#",
+    "#.###.###.#.#",
+    "#...#...#.#a#",
+    "#.#.###.#.###",
+    "#.#b#..B#...#",
+    "#.###.#####.#",
+    "#.....#f....#",
+    "#.#######.#.#",
+    "#...#f....#.#",
+    "###.###.###.#",
+    "#f...A..#f.S#",
+    "#############"
   ];
+  var MAZE = MAZE_MAP.map(function (row) {
+    return row.split("").map(function (ch) { return ch === "#" ? 1 : ch === "J" ? 2 : ch === "S" ? 3 : 0; });
+  });
 
   function emptyState() {
     return {
@@ -2104,7 +2226,7 @@
   var audioCtx = null;
   var petalHintTimer = null;
   var petalFound = [];
-  var mazePos = { x: 7, y: 10 };
+  var mazePos = { x: 11, y: 13 };
   var mazeWon = false;
   var cellSize = 32;
   var swipeStart = null;
@@ -2754,7 +2876,8 @@
     ],
     mazeBefore: [
       { who: "baoyu", bg: "redcourt", text: "{name}！你来得正好。我把院子找了一遍。还是没有玉。只看见地上有一点点亮。" },
-      { who: "baoyu", bg: "redcourt", text: "我们跟着亮光走吧！你走前面。我在后面给你加油。小心，别撞到花架子哦。" }
+      { who: "baoyu", bg: "redcourt", text: "我们提着小灯笼走吧！你走前面。我在后面给你加油。小心，别撞到花架子哦。" },
+      { who: "baoyu", bg: "redcourt", text: "院子里起雾了，只看得见身边。有两道小门锁着，要先找到钥匙。路上还有海棠花，能摘就多摘几朵吧！" }
     ],
     mazeAfter: [
       { who: "baoyu", bg: "redcourt", text: "这儿有个小玉盒！我打开看看。咦，是空的。" },
@@ -3427,6 +3550,48 @@
     return { x: 1, y: 1 };
   }
 
+  /* ===== 怡红院：雾里找钥匙、开小门、摘海棠 ===== */
+  var MAZE_STARS_KEY = "honglou-maze-best-stars";
+  var MAZE_GATES = {
+    A: { key: "a", color: "red", name: "月亮门", keyName: "红钥匙" },
+    B: { key: "b", color: "gold", name: "小木门", keyName: "金钥匙" }
+  };
+  var MAZE_GATE_ORDER = ["A", "B"];
+  var mazeKeys = {};        // a/b: "held" | "used"
+  var mazeGateOpen = {};    // A/B: true
+  var mazeFlowersGot = 0;
+  var mazeFlowerTotal = 0;
+  var mazeTaken = {};       // "x,y": true  已经捡起的钥匙/花
+  var mazeSeen = {};
+  var mazeCells = [];
+  var mazeHintTimer = null;
+  var mazeLockSpoken = false;
+
+  function mazeCh(x, y) { return (MAZE_MAP[y] || "").charAt(x); }
+  function mazeKeyAt(x, y) { return x + "," + y; }
+
+  function keySvg(color) {
+    var c = color === "red" ? "#c9302c" : "#d9a640";
+    var d = color === "red" ? "#8e1c1f" : "#9a7320";
+    return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="11" cy="12" r="7" fill="' + c + '" stroke="' + d + '" stroke-width="2"/><circle cx="11" cy="12" r="2.6" fill="#fff6dc"/><path d="M16 15 L27 26 M22 21 L25 18 M25 24 L28 21" stroke="' + d + '" stroke-width="3.2" stroke-linecap="round"/><path d="M16 15 L27 26" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  }
+  function gateSvg(color, open) {
+    var c = color === "red" ? "#b8322f" : "#b8862e";
+    var inner = open ? '<path d="M9 28 V17 a7 7 0 0 1 14 0 V28 Z" fill="#f6e8cf"/>' :
+      (color === "red" ? '<path d="M9 28 V17 a7 7 0 0 1 14 0 V28 Z" fill="#7a2a28"/>' :
+       '<path d="M9 28 V17 a7 7 0 0 1 14 0 V28 Z" fill="#8a6a44"/><path d="M12 15 V28 M16 11 V28 M20 15 V28" stroke="#6b4a2a" stroke-width="1.5"/>');
+    var lock = open ? "" : '<rect x="12.5" y="19" width="7" height="6" rx="1.2" fill="#e7c06a" stroke="#6b4a2a" stroke-width="1"/><path d="M14 19 v-2 a2 2 0 0 1 4 0 v2" fill="none" stroke="#6b4a2a" stroke-width="1.3"/>';
+    return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 30 V14 a13 12 0 0 1 26 0 V30 Z" fill="' + c + '"/><path d="M2 8 Q16 -2 30 8 L30 11 Q16 2 2 11Z" fill="#34474a"/>' + inner + lock + "</svg>";
+  }
+  function haitangSvg() {
+    var petals = "";
+    for (var i = 0; i < 5; i++) {
+      var a = i * 72 * Math.PI / 180;
+      petals += '<circle cx="' + (16 + Math.sin(a) * 6.5).toFixed(1) + '" cy="' + (16 - Math.cos(a) * 6.5).toFixed(1) + '" r="5.6" fill="' + (i % 2 ? "#f6b8c6" : "#f29db0") + '"/>';
+    }
+    return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + petals + '<circle cx="16" cy="16" r="3.4" fill="#fbe3a0"/></svg>';
+  }
+
   function startMazeLevel() {
     playStory(STORY.mazeBefore, function () {
       showScreen("screen-maze");
@@ -3437,7 +3602,22 @@
   function setupMaze() {
     mazeWon = false;
     mazePos = findMazeCell(3);
+    mazeKeys = {};
+    mazeGateOpen = {};
+    mazeTaken = {};
+    mazeSeen = {};
+    mazeFlowersGot = 0;
+    mazeFlowerTotal = 0;
+    mazeLockSpoken = false;
+    clearTimeout(mazeHintTimer);
+    MAZE_MAP.forEach(function (row) { for (var i = 0; i < row.length; i++) if (row.charAt(i) === "f") mazeFlowerTotal++; });
+    var card = document.getElementById("maze-stars-card");
+    if (card) card.parentNode.removeChild(card);
+    var hb = document.getElementById("btn-maze-hint");
+    if (hb) hb.onclick = function () { showMazeHint(); };
+    revealAround();
     renderMaze();
+    renderMazeHud();
     window.addEventListener("resize", onMazeResize);
   }
 
@@ -3450,35 +3630,124 @@
     var rows = MAZE.length;
     var cols = MAZE[0].length;
     var wrap = document.querySelector(".maze-board-wrap");
-    var maxW = Math.max(180, wrap.clientWidth - 8);
-    var maxH = Math.max(180, wrap.clientHeight - 8);
+    var cs = window.getComputedStyle(wrap);
+    var padW = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var padH = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var edge = window.innerWidth < 520 ? 10 : 36;   // 边框和外圈装饰占的位置
+    var maxW = Math.max(180, wrap.clientWidth - padW - edge);
+    var maxH = Math.max(180, wrap.clientHeight - padH - edge);
     cellSize = Math.floor(Math.min(maxW / cols, maxH / rows));
-    cellSize = Math.max(22, Math.min(cellSize, 56));
+    cellSize = Math.max(26, Math.min(cellSize, 52));
     board.style.gridTemplateColumns = "repeat(" + cols + ", " + cellSize + "px)";
     board.style.gridTemplateRows = "repeat(" + rows + ", " + cellSize + "px)";
     board.style.setProperty("--cell", cellSize + "px");
     board.innerHTML = "";
+    mazeCells = [];
     for (var y = 0; y < rows; y++) {
+      mazeCells.push([]);
       for (var x = 0; x < cols; x++) {
         var cell = document.createElement("div");
         var v = MAZE[y][x];
+        var ch = mazeCh(x, y);
         cell.className = "cell " + (v === 1 ? "wall" : "path");
         if (v === 2) {
+          cell.classList.add("box-cell");
           var j = document.createElement("div");
           j.className = "jade-token";
           j.innerHTML = jadeSvg();
           cell.appendChild(j);
+        } else if (MAZE_GATES[ch]) {
+          cell.classList.add("gate-cell");
+          var g = document.createElement("div");
+          g.className = "mz-item mz-gate" + (mazeGateOpen[ch] ? " open" : "");
+          g.innerHTML = gateSvg(MAZE_GATES[ch].color, !!mazeGateOpen[ch]);
+          cell.appendChild(g);
+        } else if ((ch === "a" || ch === "b") && !mazeTaken[mazeKeyAt(x, y)]) {
+          var k = document.createElement("div");
+          k.className = "mz-item mz-key";
+          k.innerHTML = keySvg(ch === "a" ? "red" : "gold");
+          cell.appendChild(k);
+        } else if (ch === "f" && !mazeTaken[mazeKeyAt(x, y)]) {
+          var f = document.createElement("div");
+          f.className = "mz-item mz-flower";
+          f.innerHTML = haitangSvg();
+          cell.appendChild(f);
         }
         board.appendChild(cell);
+        mazeCells[y].push(cell);
       }
+    }
+    for (var i = 0; i < 7; i++) {
+      var ff = document.createElement("span");
+      ff.className = "firefly";
+      ff.style.left = (6 + Math.random() * 88) + "%";
+      ff.style.top = (6 + Math.random() * 88) + "%";
+      ff.style.animationDelay = (-Math.random() * 6).toFixed(1) + "s";
+      board.appendChild(ff);
     }
     var player = document.createElement("div");
     player.className = "player-token";
     player.id = "maze-player";
-    player.innerHTML = "👦";
+    player.innerHTML = '<span class="lantern-glow"></span><span class="kid">👦</span>';
     board.appendChild(player);
+    applyFog();
     placePlayer(false);
     bindMazeSwipe(board);
+  }
+
+  function revealAround() {
+    for (var dy = -2; dy <= 2; dy++) {
+      for (var dx = -2; dx <= 2; dx++) {
+        if (dx * dx + dy * dy > 5) continue;
+        var x = mazePos.x + dx, y = mazePos.y + dy;
+        if (y < 0 || y >= MAZE.length || x < 0 || x >= MAZE[0].length) continue;
+        mazeSeen[mazeKeyAt(x, y)] = true;
+      }
+    }
+  }
+
+  function applyFog() {
+    for (var y = 0; y < mazeCells.length; y++) {
+      for (var x = 0; x < mazeCells[y].length; x++) {
+        var c = mazeCells[y][x];
+        var dx = x - mazePos.x, dy = y - mazePos.y;
+        var near = dx * dx + dy * dy <= 5;
+        var seen = !!mazeSeen[mazeKeyAt(x, y)];
+        c.classList.toggle("near", near);
+        c.classList.toggle("seen", seen && !near);
+        c.classList.toggle("fog", !seen);
+      }
+    }
+  }
+
+  function starCount() {
+    if (mazeFlowersGot >= mazeFlowerTotal) return 3;
+    if (mazeFlowersGot >= Math.ceil(mazeFlowerTotal / 2)) return 2;
+    return 1;
+  }
+  function bestStars() {
+    try { return parseInt(localStorage.getItem(MAZE_STARS_KEY), 10) || 0; } catch (e) { return 0; }
+  }
+  function starsHtml(n) {
+    var h = "";
+    for (var i = 0; i < 3; i++) h += '<span class="mz-star' + (i < n ? " on" : "") + '">★</span>';
+    return h;
+  }
+
+  function renderMazeHud() {
+    var hud = document.getElementById("maze-hud");
+    if (!hud) return;
+    var html = "";
+    MAZE_GATE_ORDER.forEach(function (gid) {
+      var g = MAZE_GATES[gid];
+      var st = mazeKeys[g.key];
+      html += '<span class="mz-chip key-chip ' + (st === "held" ? "held" : st === "used" ? "used" : "") + '"><i class="mz-ico">' + keySvg(g.color) + "</i>" +
+        g.keyName + (st === "used" ? " ✓" : st === "held" ? "" : " ？") + "</span>";
+    });
+    html += '<span class="mz-chip flower-chip"><i class="mz-ico">' + haitangSvg() + "</i>海棠 " + mazeFlowersGot + " / " + mazeFlowerTotal + "</span>";
+    var best = bestStars();
+    html += '<span class="mz-chip star-chip">' + starsHtml(starCount()) + (best ? '<small>最好 ' + best + ' 星</small>' : "") + "</span>";
+    hud.innerHTML = html;
   }
 
   function placePlayer(animate, bumpX, bumpY) {
@@ -3498,28 +3767,168 @@
     }
   }
 
+  function bumpPlayer(dx, dy) {
+    var p = document.getElementById("maze-player");
+    if (!p) return;
+    p.classList.remove("bump");
+    void p.offsetWidth;
+    p.style.setProperty("--bx", dx * 6 + "px");
+    p.style.setProperty("--by", dy * 6 + "px");
+    p.classList.add("bump");
+  }
+
+  function openGate(gid, x, y) {
+    mazeGateOpen[gid] = true;
+    mazeKeys[MAZE_GATES[gid].key] = "used";
+    var cell = mazeCells[y] && mazeCells[y][x];
+    var item = cell && cell.querySelector(".mz-gate");
+    if (item) {
+      item.innerHTML = gateSvg(MAZE_GATES[gid].color, true);
+      item.classList.add("open", "opening");
+    }
+    chime("win");
+    toast(MAZE_GATES[gid].name + "打开啦！");
+    speak(MAZE_GATES[gid].name + "打开啦！");
+    renderMazeHud();
+  }
+
   function tryMove(dx, dy) {
     if (mazeWon) return;
     var nx = mazePos.x + dx;
     var ny = mazePos.y + dy;
     if (ny < 0 || ny >= MAZE.length || nx < 0 || nx >= MAZE[0].length || MAZE[ny][nx] === 1) {
-      var p = document.getElementById("maze-player");
-      if (p) {
-        p.classList.remove("bump");
-        void p.offsetWidth;
-        p.style.setProperty("--bx", dx * 6 + "px");
-        p.style.setProperty("--by", dy * 6 + "px");
-        p.classList.add("bump");
-      }
+      bumpPlayer(dx, dy);
       return;
+    }
+    var ch = mazeCh(nx, ny);
+    if (MAZE_GATES[ch] && !mazeGateOpen[ch]) {
+      var g = MAZE_GATES[ch];
+      if (mazeKeys[g.key] === "held") {
+        openGate(ch, nx, ny);
+      } else {
+        bumpPlayer(dx, dy);
+        var msg = "门锁着，先找" + g.keyName + "吧。";
+        toast(msg);
+        if (!mazeLockSpoken) { mazeLockSpoken = true; speak(msg); }
+        return;
+      }
     }
     mazePos = { x: nx, y: ny };
     placePlayer(true);
+    revealAround();
+    applyFog();
+    var k = mazeKeyAt(nx, ny);
+    if ((ch === "a" || ch === "b") && !mazeTaken[k]) {
+      mazeTaken[k] = true;
+      mazeKeys[ch] = "held";
+      var ki = mazeCells[ny][nx].querySelector(".mz-key");
+      if (ki) ki.classList.add("picked");
+      chime("ok");
+      var gname = ch === "a" ? MAZE_GATES.A : MAZE_GATES.B;
+      toast("拿到" + gname.keyName + "！");
+      speak("拿到" + gname.keyName + "了！它能打开" + gname.name + "。");
+      renderMazeHud();
+    } else if (ch === "f" && !mazeTaken[k]) {
+      mazeTaken[k] = true;
+      mazeFlowersGot += 1;
+      var fi = mazeCells[ny][nx].querySelector(".mz-flower");
+      if (fi) fi.classList.add("picked");
+      chime("ok");
+      toast("摘到海棠花 " + mazeFlowersGot + " / " + mazeFlowerTotal);
+      renderMazeHud();
+    }
     if (MAZE[ny][nx] === 2) {
       mazeWon = true;
-      chime("ok");
-      setTimeout(finishMazeLevel, 350);
+      clearMazeHint();
+      chime("win");
+      setTimeout(showMazeStars, 450);
     }
+  }
+
+  /* --- 提示：只亮接下来 4 步 --- */
+  function clearMazeHint() {
+    clearTimeout(mazeHintTimer);
+    var lit = document.querySelectorAll("#maze-board .hint-step");
+    for (var i = 0; i < lit.length; i++) lit[i].classList.remove("hint-step");
+  }
+
+  function mazeGoal() {
+    for (var i = 0; i < MAZE_GATE_ORDER.length; i++) {
+      var gid = MAZE_GATE_ORDER[i];
+      if (mazeGateOpen[gid]) continue;
+      var g = MAZE_GATES[gid];
+      if (mazeKeys[g.key] === "held") return { ch: gid, say: "拿着" + g.keyName + "，去开" + g.name + "。" };
+      return { ch: g.key, say: "跟着亮光，去找" + g.keyName + "。" };
+    }
+    return { ch: "J", say: "跟着亮光，去找小玉盒。" };
+  }
+
+  function mazePathTo(goalCh) {
+    var start = mazePos;
+    var prev = {};
+    var sk = mazeKeyAt(start.x, start.y);
+    prev[sk] = null;
+    var q = [start];
+    var found = null;
+    while (q.length) {
+      var c = q.shift();
+      if (mazeCh(c.x, c.y) === goalCh && !(c.x === start.x && c.y === start.y)) { found = c; break; }
+      var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (var d = 0; d < 4; d++) {
+        var nx = c.x + dirs[d][0], ny = c.y + dirs[d][1];
+        if (ny < 0 || ny >= MAZE.length || nx < 0 || nx >= MAZE[0].length || MAZE[ny][nx] === 1) continue;
+        var ch = mazeCh(nx, ny);
+        if (MAZE_GATES[ch] && !mazeGateOpen[ch] && ch !== goalCh) continue;
+        var nk = mazeKeyAt(nx, ny);
+        if (nk in prev) continue;
+        prev[nk] = c;
+        q.push({ x: nx, y: ny });
+      }
+    }
+    if (!found) return [];
+    var path = [];
+    var cur = found;
+    while (cur && !(cur.x === start.x && cur.y === start.y)) { path.unshift(cur); cur = prev[mazeKeyAt(cur.x, cur.y)]; }
+    return path;
+  }
+
+  function showMazeHint() {
+    if (mazeWon) return;
+    clearMazeHint();
+    var goal = mazeGoal();
+    var path = mazePathTo(goal.ch).slice(0, 4);
+    path.forEach(function (c, i) {
+      var cell = mazeCells[c.y] && mazeCells[c.y][c.x];
+      if (cell) { cell.style.setProperty("--hint-delay", (i * 0.15) + "s"); cell.classList.add("hint-step"); }
+    });
+    toast(goal.say.replace("跟着亮光，", ""));
+    speak(goal.say);
+    mazeHintTimer = setTimeout(clearMazeHint, 4500);
+  }
+
+  /* --- 结束：星星 --- */
+  function showMazeStars() {
+    var n = starCount();
+    var best = bestStars();
+    if (n > best) { try { localStorage.setItem(MAZE_STARS_KEY, String(n)); } catch (e) {} }
+    renderMazeHud();
+    var old = document.getElementById("maze-stars-card");
+    if (old) old.parentNode.removeChild(old);
+    var card = document.createElement("div");
+    card.id = "maze-stars-card";
+    card.className = "maze-stars-card";
+    var words = ["", "一", "两", "三"][n];
+    var line = n === 3 ? "海棠花全摘到了，真棒！" : n === 2 ? "摘到了一半的海棠花，很不错！" : "找到了小玉盒！下次再多摘几朵海棠吧。";
+    card.innerHTML = '<div class="msc-box"><h2>走到小玉盒啦！</h2><div class="msc-stars">' + starsHtml(n) + "</div>" +
+      "<p>海棠花 " + mazeFlowersGot + " / " + mazeFlowerTotal + "。" + line + "</p>" +
+      (n > best && best ? '<p class="msc-best">新纪录！</p>' : "") +
+      '<button type="button" class="btn-main" id="btn-maze-stars-ok">好的</button></div>';
+    document.getElementById("screen-maze").appendChild(card);
+    document.getElementById("btn-maze-stars-ok").onclick = function () {
+      if (card.parentNode) card.parentNode.removeChild(card);
+      finishMazeLevel();
+    };
+    speak("走到小玉盒啦！你得到了" + words + "颗星。" + line);
   }
 
   function bindMazeSwipe(board) {
@@ -3555,6 +3964,7 @@
 
   function finishMazeLevel() {
     window.removeEventListener("resize", onMazeResize);
+    clearMazeHint();
     var first = !state.completed.maze;
     state.completed.maze = true;
     state.chapters.maze = true;
@@ -4031,6 +4441,7 @@
   /* ===== Init ===== */
   function leaveLevel() {
     clearTimeout(petalHintTimer);
+    clearTimeout(mazeHintTimer);
     stopFlowerWind();
     clearTimeout(chickenTimer);
     stopSpeak();
