@@ -1742,6 +1742,38 @@
       .fish-panel { min-height: 80px; padding-top: 0.3rem; padding-bottom: 0.3rem; }
       .fish-hud { padding: 0.2rem 0.5rem; }
     }
+    .fish-kid { position: absolute; left: 60%; bottom: 0; width: clamp(62px, 12%, 96px); aspect-ratio: 100 / 130; transform: translateX(-50%); }
+    .fish-kid svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.2)); }
+    .fish-line .aim { stroke: #fffbe0; stroke-width: 3.5; fill: none; stroke-dasharray: 2 10; stroke-linecap: round; }
+    .fish-line .aim-dot { fill: rgba(255,250,210,0.28); stroke: #fffbe0; stroke-width: 3; stroke-dasharray: 6 5; }
+    .fish-line .drag { stroke: rgba(255,214,110,0.75); stroke-width: 10; stroke-linecap: round; fill: none; }
+    .bobber.flying .bobber-float { clip-path: none; transform: scale(var(--fly, 1)); transition: none; }
+    .bobber.flying .bobber-ring { opacity: 0; }
+    .pond-splash { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 5; }
+    .pond-splash i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.95); animation: splashDrop 0.6s ease-out forwards; }
+    .pond-splash i:nth-child(1) { --sx: -34px; --sy: -26px; }
+    .pond-splash i:nth-child(2) { --sx: -16px; --sy: -40px; }
+    .pond-splash i:nth-child(3) { --sx: 4px; --sy: -46px; }
+    .pond-splash i:nth-child(4) { --sx: 20px; --sy: -38px; }
+    .pond-splash i:nth-child(5) { --sx: 36px; --sy: -22px; }
+    .pond-splash i:nth-child(6) { --sx: -2px; --sy: -24px; width: 12px; height: 12px; }
+    @keyframes splashDrop { 0% { transform: translate(0, 0) scale(0.6); opacity: 1; } 60% { opacity: 1; } 100% { transform: translate(var(--sx), calc(var(--sy) + 30px)) scale(0.3); opacity: 0; } }
+    .cast-hand { position: absolute; left: 50%; bottom: calc(clamp(60px, 12%, 84px) + 6px); width: 70px; height: 170px; margin-left: -35px; pointer-events: none; z-index: 8; opacity: 0; transition: opacity 0.3s; }
+    .cast-hand.show { opacity: 1; }
+    .ch-hand { position: absolute; left: 14px; bottom: 0; font-size: 44px; line-height: 1; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); animation: handSwipe 1.7s ease-in-out infinite; }
+    .ch-trail { position: absolute; left: 31px; bottom: 30px; width: 8px; height: 130px; border-radius: 4px; background: linear-gradient(0deg, rgba(255,250,210,0), rgba(255,250,210,0.85)); animation: trailGrow 1.7s ease-in-out infinite; transform-origin: bottom; }
+    @keyframes handSwipe { 0%, 15% { transform: translateY(0); opacity: 0; } 25% { opacity: 1; } 60% { transform: translateY(-120px); opacity: 1; } 80%, 100% { transform: translateY(-130px); opacity: 0; } }
+    @keyframes trailGrow { 0%, 25% { transform: scaleY(0); opacity: 0; } 60% { transform: scaleY(1); opacity: 1; } 85%, 100% { transform: scaleY(1); opacity: 0; } }
+    .btn-recall {
+      margin-left: 0.6rem; min-width: 64px; min-height: 52px; border-radius: 16px; font: 800 1.05rem/1 var(--ui); color: var(--zhu-deep);
+      background: #fffaf0; border: 2px solid var(--jin); box-shadow: 0 4px 0 rgba(110,60,30,0.25); cursor: pointer;
+    }
+    .btn-recall[hidden] { display: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .ch-hand { animation: none; transform: translateY(-60px); }
+      .ch-trail { animation: none; }
+      .pond-splash { display: none; }
+    }
     .haptic-tap { position: absolute; inset: 0; z-index: 9; pointer-events: none; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
     .haptic-tap.on { pointer-events: auto; }
     #haptic-switch { position: absolute; left: 50%; top: 50%; width: 1px; height: 1px; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
@@ -1951,9 +1983,10 @@
       <button type="button" class="icon-btn wide" id="btn-maze-hint">提示</button>
     </div>
     <div class="fish-hud" id="fish-hud"></div>
-    <div class="fish-pond" id="fish-pond" aria-label="荷塘，点水面放鱼钩"></div>
+    <div class="fish-pond" id="fish-pond" aria-label="荷塘，按住往上一甩就能抛竿"></div>
     <div class="fish-panel" id="fish-panel">
       <div class="fish-tip" id="fish-tip"></div>
+      <button type="button" class="btn-recall" id="btn-recall" hidden>收竿</button>
       <div class="reel-ui" id="reel-ui" hidden>
         <div class="reel-col">
           <div class="reel-label">收线<span class="reel-prog"><i id="reel-prog"></i></span></div>
@@ -2813,7 +2846,7 @@
     mazeBefore: [
       { who: "baoyu", bg: "redcourt", text: "{name}！你来得正好。我把院子找了一遍，还是没有玉。可是荷塘里，有一点点亮光。" },
       { who: "baoyu", bg: "redcourt", text: "上次我和姐姐们在这儿钓过鱼。我们也来钓鱼吧！说不定能把亮亮的东西钓上来。" },
-      { who: "baoyu", bg: "redcourt", text: "点一点水面，放下鱼钩。浮漂沉下去，出现“！”，就快点一下。先钓三条红鲤鱼，两条金鱼！" }
+      { who: "baoyu", bg: "redcourt", text: "手指按住水面，往上一甩，就能抛竿。浮漂沉下去，出现“！”，就快点一下。先钓三条红鲤鱼，两条金鱼！" }
     ],
     mazeAfter: [
       { who: "baoyu", bg: "redcourt", text: "你钓起来一个小玉盒！我打开看看。咦，是空的。" },
@@ -3614,6 +3647,13 @@
     fishSaid = {};
     fishSparkle = null;
     fishRing = null;
+    rodState = { aim: -0.3, pull: 0 };
+    fishAim = null;
+    fishCast = null;
+    fishRecall = null;
+    fishFailTaps = 0;
+    fishTapCast = false;
+    fishPreferred = null;
     var old = fishEl("fish-stars-card");
     if (old) old.remove();
     var pond = fishEl("fish-pond");
@@ -3625,8 +3665,9 @@
       '<div class="pond-pad" style="left:18%;top:70%;width:11%">' + lotusLeafSvg(false) + "</div>" +
       '<div class="pond-shimmer" aria-hidden="true"></div>' +
       '<div class="fish-layer" id="fish-layer"></div>' +
-      '<svg class="fish-line" id="fish-line" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path id="fish-rod-shadow" class="rod-shadow"/><path id="fish-rod" class="rod"/><path id="fish-string" class="string"/><path id="fish-hook" class="hook"/></svg>' +
-      '<div class="pond-near"><div class="fish-baoyu" id="fish-baoyu">' + chibiSvg("baoyu") + '</div><div class="cheer-bubble" id="cheer-bubble"></div></div>' +
+      '<svg class="fish-line" id="fish-line" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path id="fish-drag" class="drag"/><path id="fish-aim" class="aim"/><circle id="fish-aim-dot" class="aim-dot" r="0"/><path id="fish-rod-shadow" class="rod-shadow"/><path id="fish-rod" class="rod"/><path id="fish-string" class="string"/><path id="fish-hook" class="hook"/></svg>' +
+      '<div class="pond-near"><div class="fish-baoyu" id="fish-baoyu">' + chibiSvg("baoyu") + '</div><div class="cheer-bubble" id="cheer-bubble"></div><div class="fish-kid" id="fish-kid">' + kidSvg() + '</div></div>' +
+      '<div class="cast-hand" id="cast-hand" aria-hidden="true"><span class="ch-trail"></span><span class="ch-hand">👆</span></div>' +
       // iPhone 震动：咬钩时盖住水面的透明 label，孩子真正点下去时拨动隐藏的 switch，系统会“嗒”一下
       '<label class="haptic-tap" id="haptic-tap" for="haptic-switch" aria-hidden="true"><input type="checkbox" switch id="haptic-switch" tabindex="-1" aria-hidden="true"></label>' +
       '<button type="button" class="haptic-toggle" id="btn-haptics" aria-pressed="true"></button>';
@@ -3636,8 +3677,9 @@
     renderFishHud();
     renderHapticToggle();
     setFishPhase("idle");
-    setFishTip("点一点水面，把鱼钩放下去。");
+    setFishTip("按住水面，往上一甩，抛竿！");
     showReelUI(false);
+    showCastHand();
     window.addEventListener("resize", onFishResize);
     fishLastT = 0;
     fishRaf = requestAnimationFrame(fishTick);
@@ -3653,6 +3695,10 @@
     fishRaf = 0;
     fishPhase = "off";
     fishHolding = false;
+    fishAim = null;
+    fishCast = null;
+    fishRecall = null;
+    hideCastHand();
     setHapticTap(false);
     window.removeEventListener("resize", onFishResize);
   }
@@ -3680,10 +3726,7 @@
     if (b < t + 40) b = t + 40;
     return { l: 22, r: fishW - 22, t: t, b: b };
   }
-  function rodTip() {
-    var bend = fishPhase === "reel" ? (fishHolding ? 22 : 10) : fishPhase === "bite" ? 8 : 0;
-    return { x: fishW * 0.72, y: fishH - nearBankH() - Math.min(70, fishH * 0.12) + bend };
-  }
+
 
   function newFish(kind) {
     var b = pondBounds();
@@ -3750,28 +3793,35 @@
     fishLastT = t;
     fishList.forEach(function (o) { moveFish(o, dt); });
     if (fishReel) tickReel(dt);
+    tickRod(dt);
+    if (fishCast) tickCast(dt);
+    if (fishRecall) tickRecall(dt);
     drawLine();
+    drawAim();
     if (fishRing && fishRing.follow) placeRing(fishRing.follow.x, fishRing.follow.y);
     fishRaf = requestAnimationFrame(fishTick);
   }
 
   function drawLine() {
     var tip = rodTip();
-    var base = { x: fishW - 8, y: fishH - 6 };
-    var rod = "M" + base.x + " " + base.y + " Q" + (base.x - (base.x - tip.x) * 0.4) + " " + (tip.y + (base.y - tip.y) * 0.25 - (fishPhase === "reel" ? 0 : 10)) + " " + tip.x + " " + tip.y;
+    var base = rodBase();
+    var cx = base.x + (tip.x - base.x) * 0.5 + (fishPhase === "reel" ? 10 : 6);
+    var cy = base.y + (tip.y - base.y) * 0.5 + (fishPhase === "reel" ? 14 : 4);
+    var rod = "M" + base.x.toFixed(1) + " " + base.y.toFixed(1) + " Q" + cx.toFixed(1) + " " + cy.toFixed(1) + " " + tip.x.toFixed(1) + " " + tip.y.toFixed(1);
     fishEl("fish-rod").setAttribute("d", rod);
     fishEl("fish-rod-shadow").setAttribute("d", rod);
     var str = fishEl("fish-string"), hook = fishEl("fish-hook");
     if (fishBobber) {
       var bx = fishBobber.x, by = fishBobber.y - 12 * fishScale;
-      var sag = fishPhase === "reel" ? 4 : 26;
-      str.setAttribute("d", "M" + tip.x + " " + tip.y + " Q" + ((tip.x + bx) / 2) + " " + (Math.max(tip.y, by) + sag) + " " + bx + " " + by);
+      var sag = fishPhase === "reel" ? 4 : (fishCast || fishRecall) ? 8 : 26;
+      str.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " Q" + ((tip.x + bx) / 2).toFixed(1) + " " + (Math.max(tip.y, by) + sag).toFixed(1) + " " + bx.toFixed(1) + " " + by.toFixed(1));
       hook.setAttribute("d", "");
     } else {
-      str.setAttribute("d", "M" + tip.x + " " + tip.y + " L" + (tip.x + 2) + " " + (tip.y + 34));
-      hook.setAttribute("d", "M" + (tip.x + 2) + " " + (tip.y + 34) + " q0 8 -6 7 q-4 -1 -3 -5");
+      str.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " L" + (tip.x + 2).toFixed(1) + " " + (tip.y + 34).toFixed(1));
+      hook.setAttribute("d", "M" + (tip.x + 2).toFixed(1) + " " + (tip.y + 34).toFixed(1) + " q0 8 -6 7 q-4 -1 -3 -5");
     }
   }
+
 
   function pondPoint(e) {
     var r = fishEl("fish-pond").getBoundingClientRect();
@@ -3790,14 +3840,285 @@
       case "reel": fishHolding = true; break;
       case "nibble": toast("还没咬钩呢。等“！”出来再点。"); break;
       case "catch": dismissCatch(); break;
-      case "idle": case "wait": case "come": castAt(p.x, p.y); break;
+      case "idle": case "wait": case "come": beginAim(e, p); break;
     }
+  }
+
+  /* ---- 抛竿：按住往上一甩，方向定左右，长短定远近 ---- */
+  var rodState = { aim: -0.3, pull: 0 };
+  var fishAim = null;        // 正在拖的手指
+  var fishCast = null;       // 抛竿动画
+  var fishRecall = null;     // 收竿动画
+  var fishFailTaps = 0;
+  var fishTapCast = false;   // 小手甩不动时，点一下也能抛
+  var fishPreferred = null;
+  var fishHandTimer = null;
+
+  function rodBase() { return { x: fishW * 0.6 + 16 * fishScale, y: fishH - nearBankH() * 0.55 }; }
+  function rodLen() { return Math.max(90, Math.min(170, fishH * 0.24)); }
+  function rodTip() {
+    var b = rodBase(), L = rodLen() * (1 - 0.55 * rodState.pull);
+    var bend = fishPhase === "reel" ? (fishHolding ? 22 : 10) : fishPhase === "bite" ? 8 : 0;
+    return { x: b.x + Math.sin(rodState.aim) * L, y: b.y - Math.cos(rodState.aim) * L + rodState.pull * 30 + bend };
+  }
+  function aimAngleTo(x, y) {
+    var b = rodBase();
+    return Math.max(-1.1, Math.min(1.1, Math.atan2(x - b.x, Math.max(20, b.y - y))));
+  }
+  function castTarget(dx, up, bonus) {
+    var b = pondBounds(), base = rodBase();
+    var power = Math.max(0.08, Math.min(1, up / Math.max(120, fishH * 0.38) + (bonus || 0)));
+    var near = b.b - 10, far = b.t + 6;
+    var ly = near - power * (near - far);
+    var ang = Math.max(-1.05, Math.min(1.05, Math.atan2(dx, Math.max(up, 1))));
+    var lx = base.x + Math.tan(ang) * (base.y - ly) * 1.15;
+    lx = Math.max(b.l + 10, Math.min(b.r - 10, lx));
+    return { x: lx, y: ly, power: power };
+  }
+  function kidSvg() {
+    return '<svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M22 128 C20 96 30 70 50 68 C70 70 80 96 78 128 Z" fill="#5f9a8a"/>' +
+      '<path d="M36 74 Q50 82 64 74" stroke="#ecd39a" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+      '<path d="M50 76 L50 128" stroke="#4b8070" stroke-width="2"/>' +
+      '<path d="M66 84 C74 86 80 80 84 74" stroke="#5f9a8a" stroke-width="12" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="85" cy="72" r="6" fill="#f6d2b8"/>' +
+      '<circle cx="50" cy="44" r="24" fill="#2b2428"/>' +
+      '<circle cx="29" cy="24" r="10" fill="#2b2428"/><circle cx="71" cy="24" r="10" fill="#2b2428"/>' +
+      '<path d="M21 30 l-6 8 M79 30 l6 8" stroke="#e8463a" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="29" cy="24" r="3" fill="#e8463a"/><circle cx="71" cy="24" r="3" fill="#e8463a"/>' +
+      '<ellipse cx="26" cy="48" rx="4" ry="6" fill="#f6d2b8"/><ellipse cx="74" cy="48" rx="4" ry="6" fill="#f6d2b8"/>' +
+      "</svg>";
+  }
+
+  function showCastHand(ms) {
+    var h = fishEl("cast-hand");
+    if (!h) return;
+    clearTimeout(fishHandTimer);
+    h.classList.add("show");
+    if (ms) fishHandTimer = setTimeout(function () { if (fishSaid.cast) h.classList.remove("show"); }, ms);
+  }
+  function hideCastHand() {
+    var h = fishEl("cast-hand");
+    clearTimeout(fishHandTimer);
+    if (h) h.classList.remove("show");
+  }
+  function updateRecallBtn() {
+    var b = fishEl("btn-recall");
+    if (b) b.hidden = !(fishBobber && (fishPhase === "wait" || fishPhase === "come"));
+  }
+
+  function beginAim(e, p) {
+    fishAim = { id: e.pointerId, x0: p.x, y0: p.y, x: p.x, y: p.y, t0: performance.now(), pts: [{ x: p.x, y: p.y, t: performance.now() }] };
+    var pond = fishEl("fish-pond");
+    try { if (e.pointerId != null && pond.setPointerCapture) pond.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  function onPondMove(e) {
+    if (!fishAim || !fishActive()) return;
+    if (e.pointerId != null && fishAim.id != null && e.pointerId !== fishAim.id) return;
+    if (e.cancelable) e.preventDefault();
+    var p = pondPoint(e);
+    fishAim.x = p.x; fishAim.y = p.y;
+    var now = performance.now();
+    fishAim.pts.push({ x: p.x, y: p.y, t: now });
+    while (fishAim.pts.length > 2 && now - fishAim.pts[0].t > 140) fishAim.pts.shift();
+    var up = fishAim.y0 - p.y;
+    if (up > 14) hideCastHand();
+  }
+  function aimPreview() {
+    if (!fishAim) return null;
+    var up = fishAim.y0 - fishAim.y, dx = fishAim.x - fishAim.x0;
+    if (up < 14 || up < Math.abs(dx) * 0.35) return null;
+    return castTarget(dx, up, 0);
+  }
+  function onPondUp(e) {
+    if (!fishAim) return;
+    if (e && e.pointerId != null && fishAim.id != null && e.pointerId !== fishAim.id) return;
+    var a = fishAim;
+    fishAim = null;
+    if (e && e.type === "pointercancel") return;
+    if (!fishActive() || !(fishPhase === "idle" || fishPhase === "wait" || fishPhase === "come")) return;
+    if (e && e.changedTouches) { var p0 = pondPoint(e); a.x = p0.x; a.y = p0.y; }
+    var up = a.y0 - a.y, dx = a.x - a.x0;
+    var dist = Math.sqrt(up * up + dx * dx);
+    if (up >= 28 && up >= Math.abs(dx) * 0.35) {
+      var first = a.pts[0], last = a.pts[a.pts.length - 1];
+      var v = last.t > first.t ? (first.y - last.y) / (last.t - first.t) : 0;   // 像素/毫秒
+      var bonus = Math.max(0, Math.min(0.15, (v - 0.7) * 0.15));
+      fishFailTaps = 0;
+      startCast(castTarget(dx, up, bonus));
+      return;
+    }
+    if (up <= -28) { toast("要往上甩哦！"); showCastHand(2600); return; }
+    if (dist < 24 && fishTapCast) { startCast({ x: a.x, y: a.y }); return; }
+    // 只点了一下，或者甩得太短
+    fishFailTaps++;
+    showCastHand(3200);
+    if (fishFailTaps >= 3 && !fishTapCast) {
+      fishTapCast = true;
+      toast("甩不动也没关系，点一下水面，鱼钩就飞过去。");
+      cheer("我帮你！");
+      return;
+    }
+    toast(dist < 24 ? "往上一甩，抛竿！" : "再甩长一点！");
+    if (!fishSaid.tapTip) { fishSaid.tapTip = true; speak("往上一甩，抛竿！"); }
+  }
+
+  function startCast(target) {
+    var b = pondBounds();
+    var x = Math.max(b.l + 10, Math.min(b.r - 10, target.x));
+    var y = Math.max(b.t, Math.min(b.b, target.y));
+    sendBiterAway(false);
+    removeBobber();
+    clearHintRing();
+    hideCastHand();
+    fishSaid.cast = true;
+    haptic("cast");
+    softNoise("rustle");
+    var tip0 = rodTip();
+    fishCast = { t: 0, x: x, y: y, aim0: rodState.aim, aim1: aimAngleTo(x, y), pull0: rodState.pull, released: false, sx: tip0.x, sy: tip0.y,
+      back: fishReduce ? 0.01 : 0.18, fwd: fishReduce ? 0.01 : 0.14, fly: fishReduce ? 0.25 : 0.6 };
+    setFishPhase("cast");
+    setFishTip("嗖——");
+    updateRecallBtn();
+  }
+  function makeBobber(x, y) {
+    var el = document.createElement("div");
+    el.className = "bobber";
+    el.innerHTML = '<div class="bobber-float">' + bobberSvg() + '</div><span class="bobber-ring"></span><span class="bite-mark">!</span>';
+    fishEl("fish-pond").appendChild(el);
+    fishBobber = { el: el, x: x, y: y };
+    placeBobber();
+  }
+  function tickCast(dt) {
+    var c = fishCast;
+    c.t += dt;
+    var t1 = c.back, t2 = c.back + c.fwd;
+    if (c.t < t1) {                      // 往后拉
+      var k = c.t / t1;
+      rodState.pull = c.pull0 + (1 - c.pull0) * k;
+      rodState.aim = c.aim0 + (c.aim1 - c.aim0) * k * 0.4;
+    } else if (c.t < t2) {               // 往前甩
+      var k2 = (c.t - t1) / c.fwd;
+      rodState.pull = 1 - 1.15 * k2;
+      rodState.aim = c.aim0 + (c.aim1 - c.aim0) * (0.4 + 0.6 * k2);
+    } else {
+      rodState.pull += (0 - rodState.pull) * Math.min(1, dt * 8);
+      rodState.aim = c.aim1;
+      if (!c.released) {
+        c.released = true;
+        var tip = rodTip();
+        c.sx = tip.x; c.sy = tip.y;
+        makeBobber(tip.x, tip.y);
+        fishBobber.el.classList.add("flying");
+      }
+      var f = Math.min(1, (c.t - t2) / c.fly);
+      var dist = Math.sqrt((c.x - c.sx) * (c.x - c.sx) + (c.y - c.sy) * (c.y - c.sy));
+      var h = fishReduce ? 0 : 50 + dist * 0.35;
+      fishBobber.x = c.sx + (c.x - c.sx) * f;
+      fishBobber.y = c.sy + (c.y - c.sy) * f - h * 4 * f * (1 - f);
+      fishBobber.el.style.setProperty("--fly", (1 + 0.45 * Math.sin(Math.PI * f)).toFixed(3));
+      placeBobber();
+      if (f >= 1) { fishCast = null; fishBobber.el.classList.remove("flying"); landBobber(); }
+    }
+  }
+  function splash(x, y) {
+    ripple(x, y);
+    setTimeout(function () { if (fishActive()) ripple(x, y); }, 180);
+    if (fishReduce) return;
+    var s = document.createElement("div");
+    s.className = "pond-splash";
+    s.style.left = x + "px";
+    s.style.top = y + "px";
+    s.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
+    fishEl("fish-pond").appendChild(s);
+    setTimeout(function () { s.remove(); }, 800);
+  }
+  function landBobber() {
+    var x = fishBobber.x, y = fishBobber.y;
+    bobberState("");
+    splash(x, y);
+    plop(false);
+    setFishPhase("wait");
+    updateRecallBtn();
+    if (fishBoxMode) {
+      var dx = x - fishSparkle.x, dy = y - fishSparkle.y;
+      if (Math.sqrt(dx * dx + dy * dy) <= Math.max(70, fishW * 0.15)) {
+        setFishTip("鱼钩落在亮光旁边了！等一等……");
+        cheer("就是那儿！");
+        fishLater(function () { startBite({ box: true }); }, 900);
+      } else {
+        setFishTip("离亮光还有点远。收竿，再往亮光那边甩。");
+        cheer("再近一点点！");
+        fishLater(function () { if (fishPhase === "wait") reelBack(); }, 1500);
+      }
+      return;
+    }
+    // 落在小鱼旁边：那条鱼会很快游过来
+    var R = Math.max(90, fishW * 0.22), best = null, bd = 1e9, anyNear = false;
+    fishList.forEach(function (o) {
+      if (o.state !== "swim") return;
+      var d = Math.sqrt((o.x - x) * (o.x - x) + (o.y - y) * (o.y - y));
+      if (d < R) anyNear = true;
+      if (d < R && (needKind(o.kind) || o.kind === "star") && d < bd) { bd = d; best = o; }
+    });
+    fishPreferred = best;
+    if (best) cheer("正好在" + FISH_KINDS[best.kind].name + "旁边！");
+    setFishTip("等一等……浮漂沉下去、出现“！”，就快点一下。");
+    var delay = fishBites === 0 ? 800 : best ? rand(600, 1000) : anyNear ? rand(1100, 1800) : rand(1800, 2900);
+    fishLater(chooseBiter, delay);
+  }
+  function reelBack(msg) {
+    sendBiterAway(false);
+    if (!fishBobber) { setFishPhase("idle"); afterRecall(msg); return; }
+    bobberState("");
+    fishRecall = { t: 0, sx: fishBobber.x, sy: fishBobber.y, dur: fishReduce ? 0.15 : 0.5, msg: msg };
+    setFishPhase("recall");
+    updateRecallBtn();
+    softNoise("rustle");
+  }
+  function tickRecall(dt) {
+    var r = fishRecall;
+    r.t += dt;
+    var f = Math.min(1, r.t / r.dur), tip = rodTip();
+    fishBobber.x = r.sx + (tip.x - r.sx) * f;
+    fishBobber.y = r.sy + (tip.y + 30 - r.sy) * f - (fishReduce ? 0 : 30 * Math.sin(Math.PI * f));
+    placeBobber();
+    if (f >= 1) { fishRecall = null; removeBobber(); setFishPhase("idle"); afterRecall(r.msg); }
+  }
+  function afterRecall(msg) {
+    updateRecallBtn();
+    setFishTip(msg || (fishBoxMode ? "往亮光那边，再甩一竿！" : "往上一甩，再抛一竿！"));
+    if (!fishSaid.cast || fishFailTaps) showCastHand(2600);
+  }
+  function tickRod(dt) {
+    if (fishCast) return;
+    var target = -0.3, pull = 0;
+    var pv = aimPreview();
+    if (pv) { target = aimAngleTo(pv.x, pv.y); pull = 0.25 + pv.power * 0.6; }
+    else if (fishBobber) target = aimAngleTo(fishBobber.x, fishBobber.y);
+    rodState.aim += (target - rodState.aim) * Math.min(1, dt * 10);
+    rodState.pull += (pull - rodState.pull) * Math.min(1, dt * 10);
+  }
+  function drawAim() {
+    var path = fishEl("fish-aim"), dot = fishEl("fish-aim-dot"), drag = fishEl("fish-drag");
+    if (!path) return;
+    var pv = aimPreview();
+    if (!pv) { path.setAttribute("d", ""); dot.setAttribute("r", "0"); drag.setAttribute("d", ""); return; }
+    var tip = rodTip();
+    var mx = (tip.x + pv.x) / 2, my = Math.min(tip.y, pv.y) - 40 - pv.power * 60;
+    path.setAttribute("d", "M" + tip.x.toFixed(1) + " " + tip.y.toFixed(1) + " Q" + mx.toFixed(1) + " " + my.toFixed(1) + " " + pv.x.toFixed(1) + " " + pv.y.toFixed(1));
+    path.style.strokeOpacity = (0.45 + pv.power * 0.5).toFixed(2);
+    dot.setAttribute("cx", pv.x.toFixed(1));
+    dot.setAttribute("cy", pv.y.toFixed(1));
+    dot.setAttribute("r", (16 * fishScale).toFixed(1));
+    drag.setAttribute("d", "M" + fishAim.x0.toFixed(1) + " " + fishAim.y0.toFixed(1) + " L" + fishAim.x.toFixed(1) + " " + fishAim.y.toFixed(1));
   }
 
   function setFishPhase(p) {
     fishPhase = p;
     var pond = fishEl("fish-pond");
     if (pond) pond.setAttribute("data-phase", p);
+    updateRecallBtn();
   }
   function setFishTip(s) {
     var el = fishEl("fish-tip");
@@ -3855,44 +4176,11 @@
     if (cls) fishBobber.el.classList.add(cls);
   }
 
-  function castAt(x, y) {
-    var b = pondBounds();
-    x = Math.max(b.l + 10, Math.min(b.r - 10, x));
-    y = Math.max(b.t, Math.min(b.b, y));
-    sendBiterAway(false);
-    if (!fishBobber) {
-      var el = document.createElement("div");
-      el.className = "bobber";
-      el.innerHTML = '<div class="bobber-float">' + bobberSvg() + '</div><span class="bobber-ring"></span><span class="bite-mark">!</span>';
-      fishEl("fish-pond").appendChild(el);
-      fishBobber = { el: el };
-    }
-    fishBobber.x = x;
-    fishBobber.y = y;
-    placeBobber();
-    bobberState("");
-    ripple(x, y);
-    plop(false);
-    setFishPhase("wait");
-    clearHintRing();
-    if (fishBoxMode) {
-      var dx = x - fishSparkle.x, dy = y - fishSparkle.y;
-      if (Math.sqrt(dx * dx + dy * dy) <= Math.max(72, fishW * 0.16)) {
-        setFishTip("鱼钩放到亮光旁边了。等一等……");
-        fishLater(function () { startBite({ box: true }); }, 900);
-      } else {
-        setFishTip("离亮光再近一点。点亮光旁边的水面。");
-        cheer("再近一点点！");
-      }
-      return;
-    }
-    setFishTip("等一等……浮漂沉下去、出现“！”，就快点一下。");
-    fishLater(chooseBiter, fishBites === 0 ? 900 : rand(1300, 2600));
-  }
+
 
   /* ---- 震动：安卓用 navigator.vibrate；iPhone 只能在孩子真的点下去那一下“嗒”一声 ---- */
   var HAPTIC_KEY = "honglou-haptics-on";
-  var HAPTIC_PATTERNS = { bite: [70, 60, 70], hook: 30, "catch": [40, 50, 40, 50, 90], box: [30, 40, 30, 40, 220], on: 40 };
+  var HAPTIC_PATTERNS = { bite: [70, 60, 70], hook: 30, "catch": [40, 50, 40, 50, 90], box: [30, 40, 30, 40, 220], on: 40, cast: 25 };
   function hapticsOn() {
     try { return localStorage.getItem(HAPTIC_KEY) !== "0"; } catch (e) { return true; }
   }
@@ -3951,7 +4239,8 @@
     var pick = null;
     var star = free.filter(function (o) { return o.kind === "star"; });
     var need = free.filter(function (o) { return needKind(o.kind); });
-    if (star.length && !fishBonus && caughtTargets() >= 1 && Math.random() < 0.22) pick = star[0];
+    if (fishPreferred && fishPreferred.state === "swim" && Math.random() < 0.9) pick = fishPreferred;
+    else if (star.length && !fishBonus && caughtTargets() >= 1 && Math.random() < 0.22) pick = star[0];
     else if (need.length && Math.random() < 0.78) pick = nearestFish(need);
     else pick = nearestFish(free.filter(function (o) { return o.kind !== "star"; }).length ? free.filter(function (o) { return o.kind !== "star"; }) : free);
     comeToBobber(pick);
@@ -3959,7 +4248,7 @@
   function nearestFish(arr) {
     var best = null, bd = 1e9;
     arr.forEach(function (o) {
-      var d = Math.abs(o.x - fishBobber.x) + Math.abs(o.y - fishBobber.y) + Math.random() * 90;
+      var d = Math.abs(o.x - fishBobber.x) + Math.abs(o.y - fishBobber.y) + Math.random() * 40;
       if (d < bd) { bd = d; best = o; }
     });
     return best;
@@ -4014,9 +4303,7 @@
     cheer("没关系，再来！");
     if (!fishSaid.miss) { fishSaid.miss = true; speak("差一点！再试试。"); }
     renderFishHud();
-    setFishTip("小鱼游走了。再等等，下一条快来了。");
-    if (wasBox) fishLater(function () { startBite({ box: true }); }, 1400);
-    else fishLater(chooseBiter, rand(1500, 2600));
+    reelBack(wasBox ? "差一点！往亮光那边，再甩一竿。" : "小鱼游走了。往上一甩，再抛一竿！");
   }
 
   function hookFish() {
@@ -4080,11 +4367,9 @@
     fishHolding = false;
     showReelUI(false);
     sendBiterAway(true);
-    removeBobber();
-    setFishPhase("idle");
     toast("鱼儿溜走啦。差一点！再试试。");
     cheer("下次一定行！");
-    setFishTip("鱼儿溜走啦。再点水面，放下鱼钩。");
+    reelBack("鱼儿溜走啦。再抛一竿吧！");
     renderFishHud();
   }
 
@@ -4169,8 +4454,7 @@
     if (wasBox) { setFishPhase("done"); showFishStars(); return; }
     setFishPhase("idle");
     if (targetsDone() && !fishBoxMode) { startBoxMode(); return; }
-    if (fishBoxMode) setFishTip("把鱼钩放到亮光旁边。");
-    else setFishTip("点一点水面，再放鱼钩。");
+    afterRecall();
   }
 
   function startBoxMode() {
@@ -4182,10 +4466,10 @@
     fishEl("fish-pond").insertBefore(el, fishEl("fish-layer").nextSibling);
     fishSparkle = { el: el, x: fishW * 0.42, y: b.t + (b.b - b.t) * 0.45 };
     placeSparkle();
-    var msg = "鱼钓够啦！水里有亮光，把鱼钩放到亮光旁边。";
+    var msg = "鱼钓够啦！水里有亮光，往亮光那边甩一竿。";
     setFishTip(msg);
     toast("水里有亮光！");
-    speak("水里有亮光！把鱼钩放到亮光旁边。");
+    speak("水里有亮光！往亮光那边甩一竿。");
     cheer("快看，亮亮的！");
   }
   function placeSparkle() {
@@ -4250,13 +4534,14 @@
     if (fishPhase === "idle" || (fishBoxMode && fishPhase === "wait")) {
       if (fishBoxMode) {
         ringAt(fishSparkle.x, fishSparkle.y);
-        say = "把鱼钩放到亮光旁边。";
+        say = fishPhase === "wait" ? "鱼钩要落在亮光旁边。收竿，再往亮光那边甩。" : "按住水面，往亮光那边一甩。";
       } else {
         var need = fishList.filter(function (o) { return o.state === "swim" && needKind(o.kind); });
         var o = need[0] || fishList[0];
         if (o) ringAt(o.x, o.y, o);
-        say = o && needKind(o.kind) ? "点一点" + FISH_KINDS[o.kind].name + "旁边的水面，放下鱼钩。" : "点一点水面，放下鱼钩。";
+        say = o && needKind(o.kind) ? "按住水面，往" + FISH_KINDS[o.kind].name + "那边一甩，抛竿！" : "按住水面，往上一甩，抛竿！";
       }
+      if (fishPhase === "idle") showCastHand(3500);
     } else if (fishPhase === "wait" || fishPhase === "come") {
       if (fishPhase === "wait") { clearFishTimers(); chooseBiter(); }
       if (fishBiter && fishBiter.kind) { fishBiter.boost = 1.8; ringAt(fishBiter.x, fishBiter.y, fishBiter); }
@@ -4306,18 +4591,21 @@
   function bindFishControls() {
     var pond = fishEl("fish-pond");
     var reelBtn = fishEl("btn-reel");
-    var up = function () { fishHolding = false; reelBtn.classList.remove("down"); };
+    var up = function (e) { fishHolding = false; reelBtn.classList.remove("down"); onPondUp(e); };
     var down = function (e) {
       if (e.cancelable) e.preventDefault();
       if (fishPhase === "reel") { fishHolding = true; reelBtn.classList.add("down"); }
     };
     if (window.PointerEvent) {
       pond.addEventListener("pointerdown", onPondDown);
+      document.addEventListener("pointermove", onPondMove, { passive: false });
       reelBtn.addEventListener("pointerdown", down);
       ["pointerup", "pointercancel"].forEach(function (ev) { document.addEventListener(ev, up); });
     } else {
       pond.addEventListener("touchstart", onPondDown, { passive: false });
       pond.addEventListener("mousedown", onPondDown);
+      pond.addEventListener("touchmove", onPondMove, { passive: false });
+      document.addEventListener("mousemove", onPondMove);
       reelBtn.addEventListener("touchstart", down, { passive: false });
       reelBtn.addEventListener("mousedown", down);
       ["touchend", "touchcancel", "mouseup"].forEach(function (ev) { document.addEventListener(ev, up); });
@@ -4332,6 +4620,9 @@
     });
     document.addEventListener("keyup", function (e) { if (e.key === " " || e.key === "Enter") fishHolding = false; });
     fishEl("btn-maze-hint").addEventListener("click", showFishHint);
+    fishEl("btn-recall").addEventListener("click", function () {
+      if (fishPhase === "wait" || fishPhase === "come") reelBack();
+    });
   }
 
   function finishMazeLevel() {
