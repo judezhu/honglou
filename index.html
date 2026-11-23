@@ -1742,6 +1742,17 @@
       .fish-panel { min-height: 80px; padding-top: 0.3rem; padding-bottom: 0.3rem; }
       .fish-hud { padding: 0.2rem 0.5rem; }
     }
+    .haptic-tap { position: absolute; inset: 0; z-index: 9; pointer-events: none; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+    .haptic-tap.on { pointer-events: auto; }
+    #haptic-switch { position: absolute; left: 50%; top: 50%; width: 1px; height: 1px; margin: 0; padding: 0; opacity: 0; pointer-events: none; }
+    .haptic-toggle {
+      position: absolute; right: 8px; top: 8px; z-index: 10; width: 52px; height: 52px; border-radius: 50%;
+      font: 700 0.72rem/1.15 var(--ui); color: var(--zhu-deep); background: rgba(255,250,238,0.92);
+      border: 2px solid var(--jin); box-shadow: 0 3px 0 rgba(110,60,30,0.25); cursor: pointer; padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .haptic-toggle b { font-size: 1rem; }
+    .haptic-toggle.off { color: #8a7d66; border-color: #c9bfa8; background: rgba(240,234,220,0.92); }
     @media (prefers-reduced-motion: reduce) {
       .pond-shimmer, .fish-baoyu.hop, .bobber .bobber-float, .bobber .bite-mark, .pond-sparkle, .pond-sparkle i, .fish-hint-ring, .catch-card, .fsc-stars .fs-star.on, .fsc-box { animation: none !important; }
       .pond-ripple { display: none; }
@@ -3615,11 +3626,15 @@
       '<div class="pond-shimmer" aria-hidden="true"></div>' +
       '<div class="fish-layer" id="fish-layer"></div>' +
       '<svg class="fish-line" id="fish-line" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path id="fish-rod-shadow" class="rod-shadow"/><path id="fish-rod" class="rod"/><path id="fish-string" class="string"/><path id="fish-hook" class="hook"/></svg>' +
-      '<div class="pond-near"><div class="fish-baoyu" id="fish-baoyu">' + chibiSvg("baoyu") + '</div><div class="cheer-bubble" id="cheer-bubble"></div></div>';
+      '<div class="pond-near"><div class="fish-baoyu" id="fish-baoyu">' + chibiSvg("baoyu") + '</div><div class="cheer-bubble" id="cheer-bubble"></div></div>' +
+      // iPhone 震动：咬钩时盖住水面的透明 label，孩子真正点下去时拨动隐藏的 switch，系统会“嗒”一下
+      '<label class="haptic-tap" id="haptic-tap" for="haptic-switch" aria-hidden="true"><input type="checkbox" switch id="haptic-switch" tabindex="-1" aria-hidden="true"></label>' +
+      '<button type="button" class="haptic-toggle" id="btn-haptics" aria-pressed="true"></button>';
     measurePond();
     fishList = [];
     ["red", "red", "red", "red", "gold", "gold", "gold", "white", "blue", "star"].forEach(function (k) { fishList.push(newFish(k)); });
     renderFishHud();
+    renderHapticToggle();
     setFishPhase("idle");
     setFishTip("点一点水面，把鱼钩放下去。");
     showReelUI(false);
@@ -3638,6 +3653,7 @@
     fishRaf = 0;
     fishPhase = "off";
     fishHolding = false;
+    setHapticTap(false);
     window.removeEventListener("resize", onFishResize);
   }
 
@@ -3765,8 +3781,9 @@
 
   function onPondDown(e) {
     if (!fishActive()) return;
-    if (e.target && e.target.closest && e.target.closest("#fish-stars-card")) return;
-    if (e.cancelable) e.preventDefault();
+    if (e.target && e.target.closest && e.target.closest("#fish-stars-card, #btn-haptics")) return;
+    // 点在震动用的 label 上时不 preventDefault，让它的 click 能拨动 switch
+    if (e.cancelable && !(e.target && e.target.id === "haptic-tap")) e.preventDefault();
     var p = pondPoint(e);
     switch (fishPhase) {
       case "bite": hookFish(); break;
@@ -3873,6 +3890,51 @@
     fishLater(chooseBiter, fishBites === 0 ? 900 : rand(1300, 2600));
   }
 
+  /* ---- 震动：安卓用 navigator.vibrate；iPhone 只能在孩子真的点下去那一下“嗒”一声 ---- */
+  var HAPTIC_KEY = "honglou-haptics-on";
+  var HAPTIC_PATTERNS = { bite: [70, 60, 70], hook: 30, "catch": [40, 50, 40, 50, 90], box: [30, 40, 30, 40, 220], on: 40 };
+  function hapticsOn() {
+    try { return localStorage.getItem(HAPTIC_KEY) !== "0"; } catch (e) { return true; }
+  }
+  function haptic(kind) {
+    if (!hapticsOn()) return false;
+    var pat = HAPTIC_PATTERNS[kind];
+    try {
+      if (pat && typeof navigator !== "undefined" && typeof navigator.vibrate === "function") navigator.vibrate(pat);
+    } catch (e) {}
+    return true;
+  }
+  function setHapticTap(on) {
+    var t = fishEl("haptic-tap");
+    if (!t) return;
+    t.classList.toggle("on", !!on && hapticsOn());
+    if (!t.dataset.bound) {
+      t.dataset.bound = "1";
+      t.addEventListener("click", function () {
+        var input = fishEl("haptic-switch");
+        if (input && document.activeElement === input) input.blur();
+        if (fishPhase !== "bite") setTimeout(function () { setHapticTap(false); }, 0);
+      });
+    }
+  }
+  function renderHapticToggle() {
+    var b = fishEl("btn-haptics");
+    if (!b) return;
+    var on = hapticsOn();
+    b.innerHTML = "震动<br><b>" + (on ? "开" : "关") + "</b>";
+    b.classList.toggle("off", !on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.setAttribute("aria-label", on ? "震动开着，点一下关掉" : "震动关着，点一下打开");
+    b.onclick = function (e) {
+      e.stopPropagation();
+      var next = !hapticsOn();
+      try { localStorage.setItem(HAPTIC_KEY, next ? "1" : "0"); } catch (err) {}
+      renderHapticToggle();
+      if (next) haptic("on");
+      toast(next ? "震动打开啦。" : "震动关掉啦。");
+    };
+  }
+
   function needKind(k) { return FISH_TARGETS[k] && (fishCaught[k] || 0) < FISH_TARGETS[k]; }
   function targetsDone() { return FISH_TARGET_ORDER.every(function (k) { return !needKind(k); }); }
   function caughtTargets() { return (fishCaught.red || 0) + (fishCaught.gold || 0); }
@@ -3926,6 +3988,8 @@
   }
   function startBiteWindow() {
     setFishPhase("bite");
+    haptic("bite");
+    setHapticTap(true);
     bobberState("bite");
     if (fishBiter && fishBiter.kind) fishBiter.state = "bite";
     plop(true);
@@ -3940,6 +4004,7 @@
     clearFishTimers();
   }
   function missBite() {
+    setHapticTap(false);
     fishMisses++;
     var wasBox = fishBiter && fishBiter.box;
     sendBiterAway(true);
@@ -3956,6 +4021,9 @@
 
   function hookFish() {
     clearFishTimers();
+    // label 要留到这次点击的 click 发生之后再收起，否则 iPhone 的“嗒”不会响
+    fishLater(function () { setHapticTap(false); }, 1200);
+    haptic("hook");
     var spec = fishBiter && fishBiter.kind ? FISH_KINDS[fishBiter.kind] : { zone: 0.44, amp: 0.1, period: 6 };
     var safe = !(fishBiter && fishBiter.kind);
     if (fishBiter && fishBiter.kind) fishBiter.state = "hooked";
@@ -4006,6 +4074,7 @@
     ui.setAttribute("data-zw", r.zw.toFixed(3));
   }
   function fishEscape() {
+    setHapticTap(false);
     fishMisses++;
     fishReel = null;
     fishHolding = false;
@@ -4021,6 +4090,7 @@
 
   function landCatch() {
     var what = fishBiter;
+    setHapticTap(false);
     fishReel = null;
     fishHolding = false;
     fishBiter = null;
@@ -4032,6 +4102,7 @@
     setFishPhase("catch");
     setFishTip(what && what.box ? "钓起小玉盒啦！" : "钓到啦！点一下，接着钓。");
     var html = "", title = "", line = "", say = "";
+    haptic(what && what.box ? "box" : "catch");
     if (what && what.box) {
       chime("win");
       if (fishSparkle) { fishSparkle.el.remove(); fishSparkle = null; }
