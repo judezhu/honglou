@@ -1838,6 +1838,271 @@
       .pond-ripple { display: none; }
       .cheer-bubble, .bobber-float { transition: none; }
     }
+
+    /* ===== 生字卡 / 再来一次认字 ===== */
+    .map-footer { flex-wrap: wrap; }
+    #btn-zika .card-count { color: #3e6a45; }
+    .guest-tag .learn-title {
+      display: inline-block;
+      margin-left: 0.35rem;
+      padding: 0.05rem 0.5rem;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff4c8, #e8c45a);
+      border: 1px solid #c6a035;
+      color: #6b4a12;
+      font-size: 0.82em;
+      letter-spacing: 0.06em;
+    }
+    .map-learn-deco {
+      position: absolute; inset: 0; z-index: 2;
+      pointer-events: none; overflow: hidden;
+    }
+    .map-learn-deco .ml-lantern {
+      position: absolute; width: 36px; height: 52px;
+      transform: translate(-50%, 0);
+      animation: mlSway 3.2s ease-in-out infinite alternate;
+      transform-origin: 50% 0;
+    }
+    .map-learn-deco .ml-lantern:nth-child(2) { animation-delay: -0.8s; }
+    .map-learn-deco .ml-lantern:nth-child(3) { animation-delay: -1.6s; }
+    .map-learn-deco .ml-lantern:nth-child(4) { animation-delay: -2.2s; }
+    @keyframes mlSway {
+      from { transform: translate(-50%, 0) rotate(-6deg); }
+      to { transform: translate(-50%, 0) rotate(6deg); }
+    }
+    .map-learn-deco .ml-lantern b {
+      display: block; width: 4px; height: 10px; margin: 0 auto;
+      background: #6b4a3a; border-radius: 2px;
+    }
+    .map-learn-deco .ml-lantern i {
+      display: block; width: 28px; height: 34px; margin: 0 auto;
+      background: radial-gradient(ellipse at 50% 30%, #ffd978, #e07050 70%);
+      border-radius: 6px 6px 10px 10px;
+      box-shadow: 0 0 10px rgba(255, 180, 60, 0.7), inset 0 -4px 0 rgba(120, 30, 20, 0.2);
+    }
+    .map-learn-deco .ml-lantern i::after {
+      content: ""; display: block; width: 6px; height: 6px; margin: 20px auto 0;
+      border-radius: 50%; background: #c6a035;
+    }
+    .map-learn-deco.fest .ml-lantern i {
+      box-shadow: 0 0 16px rgba(255, 210, 80, 0.95), 0 0 28px rgba(255, 160, 40, 0.5);
+    }
+    .map-learn-deco .ml-bloom {
+      position: absolute; font-size: 1.4rem; opacity: 0.92;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 2px rgba(80, 40, 40, 0.2));
+    }
+    .map-learn-deco.fest::after {
+      content: ""; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 8%, rgba(255, 230, 140, 0.35), transparent 46%);
+    }
+
+    #screen-zika {
+      background: linear-gradient(180deg, #e7f0d8 0%, #fbf6e9 40%, #f3e0c4 100%);
+    }
+    .zika-head {
+      padding: 0.55rem 0.9rem 0.2rem;
+      text-align: center;
+    }
+    .zika-count {
+      font-family: var(--title);
+      font-size: 1.25rem;
+      margin: 0;
+      color: #6b2e36;
+    }
+    .zika-next {
+      margin: 0.25rem 0 0;
+      font-size: 0.98rem;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+    .zika-titles { margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: center; }
+    .zika-titles span {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff4c8, #e8c45a);
+      border: 1px solid #c6a035;
+      color: #6b4a12;
+      font-size: 0.9rem;
+    }
+    .zika-actions {
+      display: flex; justify-content: center; gap: 0.5rem;
+      padding: 0.45rem 0.8rem 0.2rem;
+    }
+    .zika-actions .btn-main { min-width: 200px; min-height: 56px; font-size: 1.15rem; }
+    .zika-grid {
+      flex: 1;
+      overflow: auto;
+      padding: 0.6rem 0.8rem calc(1rem + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+      align-content: start;
+    }
+    @media (min-width: 700px) {
+      .zika-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+    @media (max-width: 380px) {
+      .zika-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .zika-card {
+      min-height: 92px;
+      border-radius: 16px;
+      background: #fffdf6;
+      border: 2px solid var(--gold-soft);
+      box-shadow: 0 3px 0 var(--gold-soft);
+      padding: 0.35rem 0.2rem 0.4rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--ink);
+    }
+    .zika-card:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--gold-soft); }
+    .zika-card.locked {
+      background: rgba(245, 240, 228, 0.85);
+      border-color: #d8d0be;
+      box-shadow: none;
+      color: #b0a68f;
+    }
+    .zika-card .zc-zi {
+      font-family: var(--title);
+      font-size: 1.85rem;
+      line-height: 1.1;
+      color: #6b2e36;
+    }
+    .zika-card.locked .zc-zi { color: #b0a68f; font-size: 1.6rem; }
+    .zika-card .zc-py { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.15rem; }
+
+    .quiz-box, .zika-detail, .review-box {
+      width: min(520px, 100%);
+      background: linear-gradient(180deg, #fffdf8, #f7e7c6);
+      border: 5px solid #c6a035;
+      border-radius: 28px;
+      padding: 1rem 0.9rem 1.1rem;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+      position: relative;
+      z-index: 2;
+      max-height: 92dvh;
+      overflow: auto;
+    }
+    .quiz-box h2, .zika-detail h2, .review-box h2 {
+      font-family: var(--title);
+      font-size: clamp(1.25rem, 4.6vw, 1.7rem);
+      margin: 0 0 0.35rem;
+      letter-spacing: 0.08em;
+      color: #6b2e36;
+    }
+    .quiz-lead { margin: 0 0 0.6rem; font-size: 1.02rem; color: var(--ink-soft); }
+    .quiz-zi {
+      font-family: var(--title);
+      font-size: clamp(4.2rem, 22vw, 6rem);
+      line-height: 1;
+      color: #6b2e36;
+      margin: 0.1rem 0 0.15rem;
+    }
+    .quiz-sen {
+      margin: 0.2rem 0 0.35rem;
+      font-size: 1.25rem;
+      line-height: 1.7;
+      color: var(--ink);
+    }
+    .quiz-sen ruby rt { font-size: 0.55em; color: #8a6a20; }
+    .quiz-ask { margin: 0.2rem 0 0.55rem; font-size: 1.12rem; color: #5c4e38; }
+    .btn-speak-zi {
+      min-width: 72px; min-height: 56px;
+      border-radius: 18px;
+      background: #fffdf6;
+      border: 2px solid var(--gold-soft);
+      box-shadow: 0 3px 0 var(--gold-soft);
+      font-size: 1.4rem;
+      margin: 0.15rem auto 0.55rem;
+    }
+    .btn-speak-zi:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--gold-soft); }
+    .quiz-choices { display: flex; flex-direction: column; gap: 0.55rem; }
+    .quiz-choice {
+      min-height: 64px;
+      width: 100%;
+      border-radius: 18px;
+      background: #fffdf6;
+      border: 3px solid #c6a035;
+      box-shadow: 0 4px 0 rgba(141, 111, 28, 0.28);
+      font-size: 1.25rem;
+      padding: 0.45rem 0.8rem;
+      color: var(--ink);
+    }
+    .quiz-choice:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(141, 111, 28, 0.28); }
+    .quiz-choice .qc-emo { margin-right: 0.35rem; }
+    .quiz-choice.wrong { animation: shake 0.4s ease; border-color: var(--blush-deep); background: #fdecee; }
+    .quiz-choice.right { border-color: var(--bamboo-deep); background: #e7f5e4; }
+    .quiz-skip {
+      margin-top: 0.7rem;
+      min-height: 52px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(255,253,246,0.85);
+      border: 2px solid rgba(198, 160, 53, 0.4);
+      font-size: 1.05rem;
+      color: var(--ink-soft);
+    }
+    .quiz-fb {
+      min-height: 1.4em;
+      margin: 0.35rem 0 0;
+      font-size: 1.05rem;
+      color: #8a5a20;
+    }
+    .quiz-fb.ok { color: #2c6a3a; }
+
+    .zika-detail .zd-zi {
+      font-family: var(--title);
+      font-size: clamp(4rem, 20vw, 5.6rem);
+      line-height: 1;
+      color: #6b2e36;
+      margin: 0;
+    }
+    .zika-detail .zd-py { margin: 0.15rem 0 0.5rem; font-size: 1.3rem; color: #8a6a20; }
+    .zika-detail .zd-words { margin: 0.2rem 0; font-size: 1.15rem; }
+    .zika-detail .zd-sen { margin: 0.45rem 0 0.3rem; font-size: 1.12rem; line-height: 1.65; color: var(--ink-soft); }
+    .zika-detail .zd-sen ruby rt { font-size: 0.55em; }
+
+    .review-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem 0.7rem;
+      margin: 0.4rem 0 0.6rem;
+    }
+    .review-pair > div { display: flex; flex-direction: column; gap: 0.55rem; }
+    .zika-match {
+      min-height: 64px;
+      border-radius: 16px;
+      background: #fffdf6;
+      border: 3px solid #c6a035;
+      box-shadow: 0 3px 0 rgba(141, 111, 28, 0.25);
+      font-size: 1.35rem;
+      padding: 0.3rem 0.4rem;
+    }
+    .zika-match[data-side="zi"] { font-family: var(--title); font-size: 1.7rem; }
+    .zika-match.selected { background: #fff4c8; box-shadow: 0 0 0 3px rgba(198,160,53,0.45), 0 3px 0 rgba(141, 111, 28, 0.25); }
+    .zika-match.correct { background: #e7f5e4; border-color: var(--bamboo-deep); box-shadow: none; }
+    .zika-match.wrong { animation: shake 0.4s ease; border-color: var(--blush-deep); }
+    .review-prog { margin: 0 0 0.4rem; color: var(--ink-soft); }
+    .learn-reward-ico { font-size: 3.2rem; margin: 0.2rem 0; line-height: 1; }
+    .learn-reward-title-chip {
+      display: inline-block;
+      margin: 0.3rem 0;
+      padding: 0.2rem 0.8rem;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff4c8, #e8c45a);
+      border: 2px solid #c6a035;
+      font-family: var(--title);
+      font-size: 1.35rem;
+      color: #6b4a12;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .map-learn-deco .ml-lantern, .quiz-choice.wrong, .zika-match.wrong { animation: none !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -1956,6 +2221,7 @@
 <g stroke='#8a6a44' stroke-width='4' stroke-linecap='round'><path d='M4 50 V30 M40 50 V30 M76 50 V30 M112 50 V30 M148 50 V30'/><path d='M0 36 H160 M0 46 H160' stroke-width='3'/></g>
 </svg><span class="mpetal" style="left:12%;animation-delay:-0s;animation-duration:14s"></span><span class="mpetal" style="left:38%;animation-delay:-5s;animation-duration:17s"></span><span class="mpetal" style="left:63%;animation-delay:-9s;animation-duration:15s"></span><span class="mpetal" style="left:86%;animation-delay:-3s;animation-duration:18s"></span><span class="mpetal" style="left:52%;animation-delay:-12s;animation-duration:16s"></span></div>
       <div class="map-spots">
+        <div id="map-learn-deco" class="map-learn-deco" aria-hidden="true"></div>
         <div class="spot" id="spot-flowers" style="left:28%; top:20%">
           <span class="spot-badge" data-badge="flowers">1</span>
           <button type="button" class="spot-btn" data-level="flowers">
@@ -1995,6 +2261,7 @@
     <div class="map-footer">
       <button type="button" class="btn-card" id="btn-book">故事书</button>
       <button type="button" class="btn-card" id="btn-collection">人物卡 <span class="card-count" id="card-count">0/7</span></button>
+      <button type="button" class="btn-card" id="btn-zika"><ruby>生字卡<rt>shēng zì kǎ</rt></ruby> <span class="card-count" id="zika-count">0/40</span></button>
       <button type="button" class="btn-card" id="btn-ending" style="display:none">会芳园</button>
     </div>
   </section>
@@ -2010,6 +2277,24 @@
     <div class="reset-row">
       <button type="button" class="btn-reset" id="btn-reset">重新开始游戏</button>
     </div>
+  </section>
+
+  <!-- ZIKA ALBUM -->
+  <section id="screen-zika" class="screen">
+    <div class="topbar">
+      <button type="button" class="icon-btn" id="btn-zika-back">返回</button>
+      <h1><ruby>生字卡<rt>shēng zì kǎ</rt></ruby></h1>
+      <button type="button" class="icon-btn" id="btn-zika-speech" aria-label="朗读开关">🔊</button>
+    </div>
+    <div class="zika-head">
+      <p class="zika-count" id="zika-album-count">已收集 0/40</p>
+      <p class="zika-next" id="zika-album-next">再收集 5 张，花园里会多几盏花灯。</p>
+      <div class="zika-titles" id="zika-album-titles"></div>
+    </div>
+    <div class="zika-actions">
+      <button type="button" class="btn-main" id="btn-zika-review">复习认字</button>
+    </div>
+    <div class="zika-grid" id="zika-grid"></div>
   </section>
 
   <!-- FLOWERS -->
@@ -2162,6 +2447,41 @@
       </p>
       <div class="end-row" id="end-row"></div>
       <button type="button" class="btn-main" id="btn-end-ok">再逛逛花园</button>
+    </div>
+  </div>
+
+  <div class="overlay center" id="overlay-quiz">
+    <div class="quiz-box" id="quiz-box">
+      <h2 id="quiz-title">答对一题，再来一次</h2>
+      <p class="quiz-lead" id="quiz-lead">答对了，这次就不算错。</p>
+      <div id="quiz-body"></div>
+      <p class="quiz-fb" id="quiz-fb"></p>
+      <button type="button" class="quiz-skip" id="btn-quiz-skip">先不答，下次再说</button>
+    </div>
+  </div>
+
+  <div class="overlay center" id="overlay-learn-reward">
+    <div class="celebrate-layer" id="learn-reward-confetti"></div>
+    <div class="reward-box">
+      <div class="learn-reward-ico" id="learn-reward-ico">🏮</div>
+      <h2 id="learn-reward-title">得到奖励</h2>
+      <div id="learn-reward-chip"></div>
+      <p id="learn-reward-msg" style="margin:0.3rem 0 0.8rem;font-size:1.08rem;line-height:1.6;color:#5c4e38"></p>
+      <button type="button" class="btn-main" id="btn-learn-reward-ok">收好啦</button>
+    </div>
+  </div>
+
+  <div class="overlay center" id="overlay-zika-card">
+    <div class="zika-detail" id="zika-detail"></div>
+  </div>
+
+  <div class="overlay center" id="overlay-zika-review">
+    <div class="review-box">
+      <h2>复习认字</h2>
+      <p class="review-prog" id="review-prog">把字和读音连起来</p>
+      <div class="review-pair" id="review-pair"></div>
+      <p class="quiz-fb" id="review-fb"></p>
+      <button type="button" class="quiz-skip" id="btn-review-close">先回去</button>
     </div>
   </div>
 
@@ -2493,7 +2813,7 @@
   }
 
   function markSpeaking(on) {
-    ["btn-map-speech", "btn-name-speech", "btn-story-speech"].forEach(function (id) {
+    ["btn-map-speech", "btn-name-speech", "btn-story-speech", "btn-zika-speech"].forEach(function (id) {
       var b = document.getElementById(id);
       if (b) b.classList.toggle("speaking", !!on);
     });
@@ -2643,7 +2963,7 @@
     if (label) label.textContent = state.speech ? "朗读开" : "朗读关";
     if (dot) dot.classList.toggle("off", !state.speech);
     document.getElementById("btn-speech").setAttribute("aria-pressed", state.speech ? "true" : "false");
-    ["btn-map-speech", "btn-name-speech", "btn-story-speech"].forEach(function (id) {
+    ["btn-map-speech", "btn-name-speech", "btn-story-speech", "btn-zika-speech"].forEach(function (id) {
       var b = document.getElementById(id);
       if (!b) return;
       b.textContent = state.speech ? "🔊" : "🔇";
@@ -3125,7 +3445,11 @@
     endBtn.style.display = readyFinale ? "inline-flex" : "none";
     endBtn.innerHTML = state.completed.finale ? "看花灯" : withRuby("会芳园");
     var tag = document.getElementById("guest-tag");
-    tag.textContent = state.playerName ? ("小客人：" + state.playerName) : "";
+    var title = highestTitle();
+    var guest = state.playerName ? ("小客人：" + escapeHtml(state.playerName)) : "";
+    tag.innerHTML = guest + (title ? ('<span class="learn-title">' + escapeHtml(title) + "</span>") : "");
+    updateZikaCountBtn();
+    renderMapLearnDeco();
     var banner = document.getElementById("clue-banner");
     banner.innerHTML = "";
     CLUES.forEach(function (c) {
@@ -3191,6 +3515,7 @@
   }
 
   function enterLevel(level) {
+    learnQuizUsed[level] = 0;
     if (!isUnlocked(level)) {
       var msg = level === "maze"
         ? "先去潇湘馆。帮帮林妹妹。看看花下有没有发现。"
@@ -3556,7 +3881,9 @@
     saveState();
     playStory(STORY.flowersAfter, function () {
       afterLevelReward(first || !state.cards.daiyu, ["daiyu"], "获得人物卡", "你认识了林黛玉。还找到了第一个发现：绿色小绳子。", function () {
-        goToMap(first ? "下一步去怡红院，去看看吧。" : "");
+        afterRewardThenLearn("flowers", function () {
+          goToMap(first ? "下一步去怡红院，去看看吧。" : "");
+        })();
       });
     }, { title: "花下的小绳子", returnScreen: "screen-map" });
   }
@@ -3849,6 +4176,7 @@
 
   function fishTick(t) {
     if (!fishActive()) { fishRaf = 0; return; }
+    if (learnQuizOpen) { fishLastT = t; fishRaf = requestAnimationFrame(fishTick); return; }
     var dt = fishLastT ? Math.min(0.05, (t - fishLastT) / 1000) : 0.016;
     fishLastT = t;
     fishList.forEach(function (o) { if (o.scaredT > 0) o.scaredT -= dt; moveFish(o, dt); });
@@ -4524,6 +4852,7 @@
     renderFishHud();
     if (wasBox) { reelBack("太急了！往亮光那边，再甩一竿。"); return; }
     backToWait("太急了，鱼吓跑了。浮漂轻轻动先别提，沉下去再提！");
+    if (!fishTutorial()) offerFishRetry("scare");
   }
   function missBite() {
     setHapticTap(false);
@@ -4536,6 +4865,7 @@
     renderFishHud();
     if (wasBox) { reelBack("慢了一点！往亮光那边，再甩一竿。"); return; }
     backToWait("慢了一点，鱼溜走了。再等等，或者换个地方抛竿。");
+    offerFishRetry("miss");
   }
 
   /* ---- 提竿 → 遛鱼（左右跟着鱼）→ 鱼累了 → 收竿 ---- */
@@ -4890,6 +5220,7 @@
     if (!fishSaid.slip) { fishSaid.slip = true; speak("差一点！鱼溜走了，再试试。"); }
     reelBack("鱼溜走了。再抛一竿吧！");
     renderFishHud();
+    offerFishRetry("slip");
   }
 
 
@@ -5171,7 +5502,9 @@
     saveState();
     playStory(STORY.mazeAfter, function () {
       afterLevelReward(first || !state.cards.baoyu, ["baoyu"], "获得人物卡", "你认识了贾宝玉。还钓起了空盒子，和一张小纸片。", function () {
-        goToMap(first ? "小纸片指向诗社。去问问探春和宝钗吧。" : "");
+        afterRewardThenLearn("maze", function () {
+          goToMap(first ? "小纸片指向诗社。去问问探春和宝钗吧。" : "");
+        })();
       });
     }, { title: "空空的玉盒", returnScreen: "screen-map" });
   }
@@ -5286,6 +5619,16 @@
         });
         clearMatchSelection();
         toast("差一点点，再试试～");
+        offerLearnQuiz("poetry", {
+          onGrant: function () {
+            var leftId = left && left.dataset.id;
+            var rightOk = leftId && document.querySelector('.match-card[data-side="right"][data-id="' + leftId + '"]');
+            if (rightOk) {
+              rightOk.classList.add("selected");
+              toast("看，右边发光的是这一句。");
+            }
+          }
+        });
       }
     }
   }
@@ -5317,7 +5660,9 @@
     saveState();
     playStory(STORY.poetryAfter, function () {
       afterLevelReward(first || !state.cards.tanchun || !state.cards.baochai, ["tanchun", "baochai"], "获得两张人物卡", "你认识了贾探春和薛宝钗。小鸡的发现，指向稻香村。", function () {
-        goToMap(first ? "去稻香村，帮帮刘姥姥吧。" : "");
+        afterRewardThenLearn("poetry", function () {
+          goToMap(first ? "去稻香村，帮帮刘姥姥吧。" : "");
+        })();
       });
     }, { title: "小纸片上的发现", returnScreen: "screen-map" });
   }
@@ -5411,12 +5756,28 @@
       chime("bad");
       toast("哎哟！这边是荷塘，鞋要湿啦！");
       speak("哎哟，这边是荷塘，鞋要湿啦。");
+      offerLearnQuiz("granny", {
+        onGrant: function () {
+          var names = { bridge: "石桥", pavilion: "花亭", garden: "菜园" };
+          var hint = names[need[got.length]] || "石桥";
+          toast("下一步是" + hint + "。");
+          speak("下一步是" + hint + "。");
+        }
+      });
       return;
     }
     if (land !== next) {
       chime("bad");
       toast("咦，还没走到这里。我们按顺序走吧。");
       speak("咦，还没走到这里。我们按顺序走吧。");
+      offerLearnQuiz("granny", {
+        onGrant: function () {
+          var names = { bridge: "石桥", pavilion: "花亭", garden: "菜园" };
+          var hint = names[need[got.length]] || "石桥";
+          toast("下一步是" + hint + "。");
+          speak("下一步是" + hint + "。");
+        }
+      });
       return;
     }
     got.push(land);
@@ -5500,7 +5861,9 @@
     saveState();
     playStory(STORY.grannyAfter, function () {
       afterLevelReward(first || !state.cards.granny, ["granny"], "获得人物卡", "你认识了刘姥姥。最后一条发现，指向贾母奶奶的花篮。", function () {
-        goToMap("发现都齐了。去会芳园找贾母奶奶吧。");
+        afterRewardThenLearn("granny", function () {
+          goToMap("发现都齐了。去会芳园找贾母奶奶吧。");
+        })();
       });
     }, { title: "花篮在哪", returnScreen: "screen-map" });
   }
@@ -5559,7 +5922,9 @@
     setTimeout(function () {
       playStory(STORY.finaleAfter, function () {
         afterLevelReward(first || !state.cards.jiamu, ["jiamu"], "获得人物卡", "你认识了贾母奶奶。宝贝玉回家了。", function () {
-          showEnding();
+          afterRewardThenLearn("finale", function () {
+            showEnding();
+          })();
         });
       }, { title: "看花灯晚会", returnScreen: "screen-map" });
     }, 700);
@@ -5604,7 +5969,9 @@
       state.cards.feng = true;
       saveState();
       afterLevelReward(first, ["feng"], "获得人物卡", "你认识了凤姐姐。先去潇湘馆，帮帮林妹妹吧。", function () {
-        goToMap("先去潇湘馆，帮帮林妹妹吧。");
+        afterRewardThenLearn("intro", function () {
+          goToMap("先去潇湘馆，帮帮林妹妹吧。");
+        })();
       });
     }, { title: "初到贾家", returnScreen: "screen-name", allowBack: true });
   }
@@ -5637,6 +6004,605 @@
     }
   }
 
+  /* ===== 生字卡 / 再来一次认字 ===== */
+  var ZIKA_KEY = "honglou-zika-v1";
+  var LEARN_CAP = 2;
+  var ZI_BANK = [
+    { zi: "花", py: "huā", mean: "花朵", emoji: "🌸", words: ["花朵", "花瓣"], sen: "园子里开满了花。", ask: "花开在哪里？", opts: ["园子里", "河里", "山上"], ans: 0, theme: "flowers" },
+    { zi: "鱼", py: "yú", mean: "小鱼", emoji: "🐟", words: ["小鱼", "金鱼"], sen: "荷塘里游着小鱼。", ask: "小鱼在哪里游？", opts: ["荷塘里", "树上", "屋里"], ans: 0, theme: "maze" },
+    { zi: "灯", py: "dēng", mean: "花灯", emoji: "🏮", words: ["花灯", "灯笼"], sen: "晚上，花园里挂着花灯。", ask: "花灯是什么时候亮？", opts: ["晚上", "早上", "中午"], ans: 0, theme: "finale" },
+    { zi: "月", py: "yuè", mean: "月亮", emoji: "🌙", words: ["月亮", "月光"], sen: "床前明月光。", ask: "月光是什么发出来的？", opts: ["月亮", "太阳", "石头"], ans: 0, theme: "poetry" },
+    { zi: "诗", py: "shī", mean: "诗歌", emoji: "📜", words: ["诗歌", "诗句"], sen: "探春喜欢读诗。", ask: "谁喜欢读诗？", opts: ["探春", "小鸡", "石头"], ans: 0, theme: "poetry" },
+    { zi: "竹", py: "zhú", mean: "竹子", emoji: "🎋", words: ["竹子", "竹林"], sen: "潇湘馆外有一片竹林。", ask: "竹林在哪里？", opts: ["潇湘馆外", "荷塘里", "厨房"], ans: 0, theme: "flowers" },
+    { zi: "桥", py: "qiáo", mean: "桥", emoji: "🌉", words: ["石桥", "小桥"], sen: "先过石桥，再过花亭。", ask: "要先过什么？", opts: ["石桥", "花亭", "菜园"], ans: 0, theme: "granny" },
+    { zi: "船", py: "chuán", mean: "小船", emoji: "⛵", words: ["小船", "游船"], sen: "湖上有一只小船。", ask: "小船在哪里？", opts: ["湖上", "山上", "屋里"], ans: 0, theme: "finale" },
+    { zi: "雪", py: "xuě", mean: "雪花", emoji: "❄️", words: ["白雪", "雪花"], sen: "冬天下了白雪。", ask: "什么时候下雪？", opts: ["冬天", "夏天", "春天"], ans: 0, theme: "finale" },
+    { zi: "风", py: "fēng", mean: "风", emoji: "💨", words: ["大风", "春风"], sen: "起风啦，花瓣飘起来了。", ask: "起风时什么飘起来了？", opts: ["花瓣", "石头", "房子"], ans: 0, theme: "flowers" },
+    { zi: "叶", py: "yè", mean: "叶子", emoji: "🍃", words: ["叶子", "竹叶"], sen: "风一吹，竹叶沙沙响。", ask: "什么在沙沙响？", opts: ["竹叶", "小鱼", "花灯"], ans: 0, theme: "flowers" },
+    { zi: "荷", py: "hé", mean: "荷花", emoji: "🪷", words: ["荷花", "荷塘"], sen: "怡红院的荷塘开着荷花。", ask: "荷花开在哪里？", opts: ["荷塘里", "竹林里", "屋顶上"], ans: 0, theme: "maze" },
+    { zi: "塘", py: "táng", mean: "池塘", emoji: "💧", words: ["荷塘", "池塘"], sen: "宝玉在荷塘边钓鱼。", ask: "宝玉在哪里钓鱼？", opts: ["荷塘边", "山上", "屋里"], ans: 0, theme: "maze" },
+    { zi: "钓", py: "diào", mean: "钓鱼", emoji: "🎣", words: ["钓鱼", "钓竿"], sen: "我们来钓鱼吧。", ask: "我们要做什么？", opts: ["钓鱼", "跑步", "睡觉"], ans: 0, theme: "maze" },
+    { zi: "明", py: "míng", mean: "明亮", emoji: "✨", words: ["明月", "明亮"], sen: "举头望明月。", ask: "抬头看见了什么？", opts: ["明月", "小鸡", "石头"], ans: 0, theme: "poetry" },
+    { zi: "春", py: "chūn", mean: "春天", emoji: "🌱", words: ["春天", "春风"], sen: "春眠不觉晓。", ask: "这首诗写的是哪个季节？", opts: ["春天", "冬天", "秋天"], ans: 0, theme: "poetry" },
+    { zi: "梅", py: "méi", mean: "梅花", emoji: "🌺", words: ["梅花", "梅树"], sen: "冬天里，梅花开了。", ask: "梅花在什么季节开？", opts: ["冬天", "夏天", "雨天"], ans: 0, theme: "poetry" },
+    { zi: "菊", py: "jú", mean: "菊花", emoji: "🌼", words: ["菊花", "菊花茶"], sen: "秋天，菊花开得很好看。", ask: "菊花在什么季节开？", opts: ["秋天", "春天", "冬天"], ans: 0, theme: "poetry" },
+    { zi: "海", py: "hǎi", mean: "大海", emoji: "🌊", words: ["大海", "海棠"], sen: "海棠花开得粉粉的。", ask: "海棠是一种什么？", opts: ["花", "鱼", "桥"], ans: 0, theme: "poetry" },
+    { zi: "棠", py: "táng", mean: "海棠", emoji: "🌸", words: ["海棠", "海棠花"], sen: "一朵海棠花，香香的。", ask: "海棠花是什么味道？", opts: ["香香的", "辣辣的", "咸咸的"], ans: 0, theme: "poetry" },
+    { zi: "鸡", py: "jī", mean: "小鸡", emoji: "🐔", words: ["小鸡", "公鸡"], sen: "刘姥姥看见小鸡跑走了。", ask: "谁看见小鸡跑了？", opts: ["刘姥姥", "月亮", "石桥"], ans: 0, theme: "granny" },
+    { zi: "蛋", py: "dàn", mean: "蛋", emoji: "🥚", words: ["鸡蛋", "鸽子蛋"], sen: "用筷子夹起鸽子蛋。", ask: "用什么夹蛋？", opts: ["筷子", "鱼竿", "叶子"], ans: 0, theme: "granny" },
+    { zi: "园", py: "yuán", mean: "花园", emoji: "🏡", words: ["花园", "大观园"], sen: "我们在大观园里玩。", ask: "我们在哪里玩？", opts: ["大观园", "海里", "山上"], ans: 0, theme: "finale" },
+    { zi: "夜", py: "yè", mean: "夜晚", emoji: "🌃", words: ["夜晚", "月夜"], sen: "夜里，花灯都亮了。", ask: "夜里什么亮了？", opts: ["花灯", "太阳", "石桥"], ans: 0, theme: "finale" },
+    { zi: "会", py: "huì", mean: "晚会", emoji: "🎉", words: ["晚会", "游园会"], sen: "看花灯的晚会开始啦。", ask: "晚会上看什么？", opts: ["花灯", "下雨", "石头"], ans: 0, theme: "finale" },
+    { zi: "篮", py: "lán", mean: "篮子", emoji: "🧺", words: ["花篮", "竹篮"], sen: "宝贝玉在贾母奶奶的花篮里。", ask: "玉在哪里？", opts: ["花篮里", "河里", "树上"], ans: 0, theme: "finale" },
+    { zi: "凤", py: "fèng", mean: "凤凰", emoji: "🦚", words: ["凤凰", "凤姐姐"], sen: "凤姐姐欢迎你来做客。", ask: "谁欢迎你？", opts: ["凤姐姐", "小鱼", "花瓣"], ans: 0, theme: "intro" },
+    { zi: "石", py: "shí", mean: "石头", emoji: "🪨", words: ["石头", "石桥"], sen: "先过石桥，鞋就不会湿。", ask: "过石桥是为了什么？", opts: ["不湿鞋", "钓鱼", "睡觉"], ans: 0, theme: "granny" },
+    { zi: "亭", py: "tíng", mean: "亭子", emoji: "🏯", words: ["花亭", "亭子"], sen: "再过花亭，就到菜园了。", ask: "花亭的后面是哪里？", opts: ["菜园", "竹林", "厨房"], ans: 0, theme: "granny" },
+    { zi: "红", py: "hóng", mean: "红色", emoji: "🔴", words: ["红色", "红鲤鱼"], sen: "池塘里有红鲤鱼。", ask: "红鲤鱼是什么颜色？", opts: ["红色", "蓝色", "白色"], ans: 0, theme: "maze" },
+    { zi: "香", py: "xiāng", mean: "香味", emoji: "🌼", words: ["花香", "稻香村"], sen: "稻香村飘着米饭的香味。", ask: "稻香村有什么味道？", opts: ["米饭的香味", "海水", "泥土"], ans: 0, theme: "granny" },
+    { zi: "妹", py: "mèi", mean: "妹妹", emoji: "👧", words: ["妹妹", "林妹妹"], sen: "林妹妹住在竹林里。", ask: "林妹妹住在哪里？", opts: ["竹林里", "船上", "菜园"], ans: 0, theme: "flowers" },
+    { zi: "哥", py: "gē", mean: "哥哥", emoji: "👦", words: ["哥哥", "小哥哥"], sen: "宝玉是大观园里的小哥哥。", ask: "谁是小哥哥？", opts: ["宝玉", "刘姥姥", "小鸡"], ans: 0, theme: "intro" },
+    { zi: "宝", py: "bǎo", mean: "宝贝", emoji: "💎", words: ["宝贝", "宝玉"], sen: "宝玉有一块宝贝玉。", ask: "宝玉有一块什么？", opts: ["宝贝玉", "花灯", "石桥"], ans: 0, theme: "intro" },
+    { zi: "玉", py: "yù", mean: "玉石", emoji: "💠", words: ["宝玉", "玉石"], sen: "贾母奶奶最疼这块玉。", ask: "奶奶最疼什么？", opts: ["这块玉", "小鸡", "小船"], ans: 0, theme: "intro" },
+    { zi: "林", py: "lín", mean: "树林", emoji: "🌲", words: ["树林", "竹林"], sen: "林黛玉的家里有竹林。", ask: "林黛玉家里有什么？", opts: ["竹林", "大海", "雪人"], ans: 0, theme: "flowers" },
+    { zi: "家", py: "jiā", mean: "家里", emoji: "🏠", words: ["家里", "贾家"], sen: "你来贾家做客。", ask: "你来谁家做客？", opts: ["贾家", "渔家", "山里"], ans: 0, theme: "intro" },
+    { zi: "门", py: "mén", mean: "大门", emoji: "🚪", words: ["大门", "家门"], sen: "走进大门，就是大观园。", ask: "走进大门会看到什么？", opts: ["大观园", "大海", "雪山"], ans: 0, theme: "intro" },
+    { zi: "水", py: "shuǐ", mean: "水", emoji: "💧", words: ["河水", "雨水"], sen: "荷塘的水清清的。", ask: "荷塘的水怎么样？", opts: ["清清的", "烫烫的", "干干的"], ans: 0, theme: "maze" },
+    { zi: "星", py: "xīng", mean: "星星", emoji: "⭐", words: ["星星", "星光"], sen: "夜里，天上有星星。", ask: "星星在哪里？", opts: ["天上", "水底", "屋里"], ans: 0, theme: "finale" }
+  ];
+  var CHAPTER_ZI = {
+    intro: ["家", "凤", "门"],
+    flowers: ["花", "竹", "风"],
+    maze: ["鱼", "荷", "钓"],
+    poetry: ["诗", "月", "春"],
+    granny: ["桥", "鸡", "石"],
+    finale: ["灯", "园", "夜"]
+  };
+  var LEARN_REWARDS = [
+    { n: 5, id: "lanterns", ico: "🏮", title: "花园花灯", msg: "你已经认识 5 个字啦！花园里多了几盏花灯。" },
+    { n: 10, id: "poet", ico: "📜", title: "小诗人", msg: "你已经认识 10 个字啦！得到称号：小诗人。", titleName: "小诗人" },
+    { n: 20, id: "haitang", ico: "🌺", title: "海棠开了", msg: "你已经认识 20 个字啦！地图上开满了海棠花。" },
+    { n: 30, id: "scholar", ico: "📖", title: "识字小能手", msg: "你已经认识 30 个字啦！得到称号：识字小能手。", titleName: "识字小能手" },
+    { n: 40, id: "master", ico: "🏅", title: "大观园小学士", msg: "40 张生字卡都集齐啦！得到称号：大观园小学士。花园里的灯会亮起来了！", titleName: "大观园小学士" }
+  ];
+  var learnQuizOpen = false;
+  var learnQuizUsed = {};
+  var learnQuiz = null;
+  var learnRewardQueue = [];
+  var learnRewardAfter = null;
+  var learnTypeToggle = 0;
+  var zikaReview = null;
+
+  function emptyZika() {
+    return { collected: {}, rewards: {}, titles: [], reviewBest: 0 };
+  }
+  function loadZika() {
+    var s = emptyZika();
+    try {
+      var raw = localStorage.getItem(ZIKA_KEY);
+      if (!raw) return s;
+      var p = JSON.parse(raw);
+      if (p && p.collected) s.collected = p.collected;
+      if (p && p.rewards) s.rewards = p.rewards;
+      if (p && p.titles && p.titles.length) s.titles = p.titles.slice();
+      if (p && typeof p.reviewBest === "number") s.reviewBest = p.reviewBest;
+    } catch (e) {}
+    return s;
+  }
+  function saveZika() {
+    try { localStorage.setItem(ZIKA_KEY, JSON.stringify(zika)); } catch (e) {}
+  }
+  var zika = loadZika();
+
+  function ziByChar(ch) {
+    for (var i = 0; i < ZI_BANK.length; i++) if (ZI_BANK[i].zi === ch) return ZI_BANK[i];
+    return null;
+  }
+  function countCollected() {
+    return Object.keys(zika.collected).length;
+  }
+  function highestTitle() {
+    var t = zika.titles || [];
+    if (!t.length) return "";
+    var order = ["大观园小学士", "识字小能手", "小诗人"];
+    for (var i = 0; i < order.length; i++) if (t.indexOf(order[i]) !== -1) return order[i];
+    return t[t.length - 1];
+  }
+  function nextReward() {
+    var n = countCollected();
+    for (var i = 0; i < LEARN_REWARDS.length; i++) {
+      if (n < LEARN_REWARDS[i].n) return LEARN_REWARDS[i];
+    }
+    return null;
+  }
+  function collectZi(ch, from) {
+    if (!ziByChar(ch) || zika.collected[ch]) return false;
+    zika.collected[ch] = { from: from || "quiz", t: Date.now() };
+    saveZika();
+    queueNewRewards();
+    return true;
+  }
+  function grantChapterZi(chapter) {
+    var list = CHAPTER_ZI[chapter] || [];
+    var added = [];
+    for (var i = 0; i < list.length; i++) {
+      if (collectZi(list[i], chapter)) added.push(list[i]);
+    }
+    return added;
+  }
+  function queueNewRewards() {
+    var n = countCollected();
+    for (var i = 0; i < LEARN_REWARDS.length; i++) {
+      var r = LEARN_REWARDS[i];
+      if (n >= r.n && !zika.rewards[r.id]) {
+        zika.rewards[r.id] = true;
+        if (r.titleName && zika.titles.indexOf(r.titleName) === -1) zika.titles.push(r.titleName);
+        learnRewardQueue.push(r);
+      }
+    }
+    if (learnRewardQueue.length) saveZika();
+  }
+  function afterRewardThenLearn(chapter, thenFn) {
+    return function () {
+      var added = grantChapterZi(chapter);
+      if (added.length) toast("得到生字卡：" + added.join("、"));
+      showQueuedLearnReward(thenFn);
+    };
+  }
+  function showQueuedLearnReward(thenFn) {
+    if (!learnRewardQueue.length) {
+      if (thenFn) thenFn();
+      return;
+    }
+    var r = learnRewardQueue.shift();
+    learnRewardAfter = function () { showQueuedLearnReward(thenFn); };
+    var ov = document.getElementById("overlay-learn-reward");
+    document.getElementById("learn-reward-ico").textContent = r.ico || "🎉";
+    document.getElementById("learn-reward-title").textContent = r.title;
+    document.getElementById("learn-reward-msg").textContent = r.msg;
+    var chip = document.getElementById("learn-reward-chip");
+    if (r.titleName) {
+      chip.innerHTML = '<div class="learn-reward-title-chip">' + escapeHtml(r.titleName) + "</div>";
+    } else chip.innerHTML = "";
+    burstConfetti(document.getElementById("learn-reward-confetti"), 28);
+    ov.classList.add("active");
+    chime("win");
+    speak(r.title + "。" + r.msg);
+    updateMap();
+  }
+  function hideLearnReward() {
+    document.getElementById("overlay-learn-reward").classList.remove("active");
+    stopSpeak();
+    var cb = learnRewardAfter;
+    learnRewardAfter = null;
+    if (cb) cb();
+  }
+
+  function senHtml(item) {
+    var s = escapeHtml(item.sen);
+    var i = s.indexOf(item.zi);
+    if (i === -1) return s;
+    return s.slice(0, i) + "<ruby>" + item.zi + "<rt>" + escapeHtml(item.py) + "</rt></ruby>" + s.slice(i + item.zi.length);
+  }
+  function speakLearn(text) {
+    if (!text) return;
+    ttsLastText = text;
+    speakNow(text);
+  }
+
+  function pickDistractors(item, key, n) {
+    var pool = [];
+    ZI_BANK.forEach(function (z) {
+      if (z.zi === item.zi) return;
+      if (z[key] === item[key]) return;
+      pool.push(z);
+    });
+    shuffle(pool);
+    return pool.slice(0, n);
+  }
+  function buildQuiz(item, typ) {
+    var q = { item: item, typ: typ, mode: "", prompt: "", speakText: "", choices: [] };
+    if (typ === "zi") {
+      q.mode = Math.random() < 0.5 ? "py" : "mean";
+      q.prompt = q.mode === "py" ? "这个字怎么读？" : "这个字是什么意思？";
+      q.speakText = item.zi;
+      if (q.mode === "py") {
+        q.choices = [{ text: item.py, ok: true }].concat(pickDistractors(item, "py", 2).map(function (z) {
+          return { text: z.py, ok: false };
+        }));
+      } else {
+        q.choices = [{ text: item.mean, emoji: item.emoji, ok: true }].concat(pickDistractors(item, "mean", 2).map(function (z) {
+          return { text: z.mean, emoji: z.emoji, ok: false };
+        }));
+      }
+    } else {
+      q.mode = Math.random() < 0.5 ? "ask" : "fill";
+      q.speakText = item.sen;
+      if (q.mode === "ask") {
+        q.prompt = item.ask;
+        q.choices = item.opts.map(function (t, i) { return { text: t, ok: i === item.ans }; });
+      } else {
+        q.prompt = "缺了哪个字？";
+        var blank = escapeHtml(item.sen).replace(item.zi, "＿");
+        q.fillHtml = blank;
+        q.choices = [{ text: item.zi, ok: true }].concat(pickDistractors(item, "zi", 2).map(function (z) {
+          return { text: z.zi, ok: false };
+        }));
+      }
+    }
+    shuffle(q.choices);
+    return q;
+  }
+  function pickQuizItem(level) {
+    var theme = level || "";
+    var unused = ZI_BANK.filter(function (z) { return !zika.collected[z.zi]; });
+    var pool = unused.length ? unused : ZI_BANK.slice();
+    var themed = pool.filter(function (z) { return z.theme === theme; });
+    var item = (themed.length ? themed : pool)[Math.floor(Math.random() * (themed.length ? themed.length : pool.length))];
+    learnTypeToggle += 1;
+    var typ = learnTypeToggle % 2 === 1 ? "zi" : "read";
+    return buildQuiz(item, typ);
+  }
+  function canOfferQuiz(level) {
+    if (learnQuizOpen) return false;
+    if ((learnQuizUsed[level] || 0) >= LEARN_CAP) return false;
+    var busy = document.querySelector(".overlay.active");
+    if (busy) return false;
+    return true;
+  }
+  function offerLearnQuiz(level, opts) {
+    opts = opts || {};
+    if (!canOfferQuiz(level)) return false;
+    learnQuizUsed[level] = (learnQuizUsed[level] || 0) + 1;
+    var q = opts.quiz || pickQuizItem(level);
+    learnQuiz = { level: level, q: q, onGrant: opts.onGrant, onSkip: opts.onSkip, granted: false };
+    renderQuiz();
+    document.getElementById("overlay-quiz").classList.add("active");
+    learnQuizOpen = true;
+    return true;
+  }
+  function renderQuiz() {
+    var q = learnQuiz.q;
+    var item = q.item;
+    setRich(document.getElementById("quiz-title"), "答对一题，再来一次");
+    document.getElementById("quiz-lead").textContent = "答对了，这次就不算错。";
+    var body = document.getElementById("quiz-body");
+    var html = "";
+    if (q.typ === "zi") {
+      html += '<div class="quiz-zi">' + escapeHtml(item.zi) + "</div>";
+    } else if (q.mode === "fill") {
+      html += '<p class="quiz-sen">' + q.fillHtml + "</p>";
+    } else {
+      html += '<p class="quiz-sen">' + senHtml(item) + "</p>";
+    }
+    html += '<button type="button" class="btn-speak-zi" id="btn-quiz-speak" aria-label="朗读">🔊</button>';
+    html += '<p class="quiz-ask">' + escapeHtml(q.prompt) + "</p>";
+    html += '<div class="quiz-choices">';
+    q.choices.forEach(function (c, i) {
+      html += '<button type="button" class="quiz-choice" data-i="' + i + '" data-ok="' + (c.ok ? "1" : "0") + '">';
+      if (c.emoji) html += '<span class="qc-emo">' + c.emoji + "</span>";
+      html += escapeHtml(c.text) + "</button>";
+    });
+    html += "</div>";
+    body.innerHTML = html;
+    document.getElementById("quiz-fb").textContent = "";
+    document.getElementById("quiz-fb").className = "quiz-fb";
+    document.getElementById("btn-quiz-speak").addEventListener("click", function () {
+      speakLearn(q.speakText);
+    });
+    body.querySelectorAll(".quiz-choice").forEach(function (btn) {
+      btn.addEventListener("click", function () { onQuizChoice(btn); });
+    });
+  }
+  function onQuizChoice(btn) {
+    if (!learnQuiz || !learnQuizOpen || learnQuiz.granted) return;
+    if (btn.classList.contains("right") || btn.classList.contains("wrong")) return;
+    var ok = btn.getAttribute("data-ok") === "1";
+    if (ok) {
+      btn.classList.add("right");
+      chime("ok");
+      var item = learnQuiz.q.item;
+      var fresh = collectZi(item.zi, "quiz");
+      var fb = document.getElementById("quiz-fb");
+      fb.className = "quiz-fb ok";
+      fb.textContent = fresh ? ("答对了！得到生字卡：" + item.zi) : "答对了！这次不算错。";
+      speakLearn("答对了！");
+      learnQuiz.granted = true;
+      var grant = learnQuiz.onGrant;
+      setTimeout(function () {
+        closeLearnQuiz(false);
+        toast(fresh ? ("答对了！得到生字卡：" + item.zi + "。这次不算错。") : "答对了！这次不算错，再来一次吧！");
+        if (grant) grant();
+        showQueuedLearnReward(null);
+      }, 650);
+    } else {
+      btn.classList.add("wrong");
+      chime("bad");
+      var fb2 = document.getElementById("quiz-fb");
+      fb2.className = "quiz-fb";
+      fb2.textContent = "再想想～";
+      speakLearn("再想想");
+      setTimeout(function () { btn.classList.remove("wrong"); }, 500);
+    }
+  }
+  function closeLearnQuiz(isSkip) {
+    document.getElementById("overlay-quiz").classList.remove("active");
+    learnQuizOpen = false;
+    var q = learnQuiz;
+    learnQuiz = null;
+    if (isSkip && q && q.onSkip) q.onSkip();
+  }
+  function skipLearnQuiz() {
+    if (!learnQuizOpen) return;
+    closeLearnQuiz(true);
+    toast("没关系，再试试也行。");
+  }
+
+  function updateZikaCountBtn() {
+    var el = document.getElementById("zika-count");
+    if (el) el.textContent = countCollected() + "/40";
+  }
+  function renderMapLearnDeco() {
+    var box = document.getElementById("map-learn-deco");
+    if (!box) return;
+    box.className = "map-learn-deco" + (zika.rewards.master ? " fest" : "");
+    var html = "";
+    if (zika.rewards.lanterns || zika.rewards.master) {
+      var spots = [[8, 30], [50, 5], [94, 18], [48, 44]];
+      if (zika.rewards.master) spots = spots.concat([[8, 50], [94, 54], [52, 86], [12, 8]]);
+      spots.forEach(function (p, i) {
+        html += '<div class="ml-lantern" style="left:' + p[0] + "%;top:" + p[1] + "%;animation-delay:-" + (i * 0.5) + 's"><b></b><i></i></div>';
+      });
+    }
+    if (zika.rewards.haitang) {
+      var blooms = [[22, 32, "🌸"], [80, 28, "🌺"], [14, 68, "🌸"], [86, 70, "🌺"], [50, 18, "🌸"], [40, 86, "🌺"]];
+      blooms.forEach(function (p) {
+        html += '<span class="ml-bloom" style="left:' + p[0] + "%;top:" + p[1] + '%">' + p[2] + "</span>";
+      });
+    }
+    box.innerHTML = html;
+  }
+  function renderZikaAlbum() {
+    updateZikaCountBtn();
+    document.getElementById("zika-album-count").textContent = "已收集 " + countCollected() + "/40";
+    var nxt = nextReward();
+    var nextEl = document.getElementById("zika-album-next");
+    if (nxt) {
+      var left = nxt.n - countCollected();
+      nextEl.textContent = "再收集 " + left + " 张，就能得到「" + nxt.title + "」。";
+    } else {
+      nextEl.textContent = "生字卡都集齐啦！你真厉害。";
+    }
+    var titles = document.getElementById("zika-album-titles");
+    titles.innerHTML = (zika.titles || []).map(function (t) { return "<span>" + escapeHtml(t) + "</span>"; }).join("");
+    var btn = document.getElementById("btn-zika-review");
+    var n = countCollected();
+    btn.disabled = n < 3;
+    btn.textContent = n < 3 ? "再收集几张就可以复习" : "复习认字";
+    var grid = document.getElementById("zika-grid");
+    grid.innerHTML = "";
+    ZI_BANK.forEach(function (item) {
+      var got = !!zika.collected[item.zi];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "zika-card" + (got ? "" : " locked");
+      b.dataset.zi = item.zi;
+      if (got) {
+        b.innerHTML = '<span class="zc-zi">' + escapeHtml(item.zi) + '</span><span class="zc-py">' + escapeHtml(item.py) + "</span>";
+        b.addEventListener("click", function () { openZikaCard(item.zi); });
+      } else {
+        b.innerHTML = '<span class="zc-zi">？</span><span class="zc-py">还没收集</span>';
+      }
+      grid.appendChild(b);
+    });
+  }
+  function openZikaAlbum() {
+    renderZikaAlbum();
+    showScreen("screen-zika");
+  }
+  function openZikaCard(ch) {
+    var item = ziByChar(ch);
+    if (!item || !zika.collected[ch]) return;
+    var box = document.getElementById("zika-detail");
+    box.innerHTML =
+      '<h2>生字卡</h2>' +
+      '<p class="zd-zi">' + escapeHtml(item.zi) + "</p>" +
+      '<p class="zd-py">' + escapeHtml(item.py) + "</p>" +
+      '<button type="button" class="btn-speak-zi" id="btn-card-speak" aria-label="朗读">🔊</button>' +
+      '<p class="zd-words">组词：' + escapeHtml(item.words.join("、")) + "</p>" +
+      '<p class="zd-sen">' + senHtml(item) + "</p>" +
+      '<button type="button" class="btn-main" id="btn-card-ok" style="min-width:180px;margin-top:0.6rem">收好啦</button>';
+    document.getElementById("overlay-zika-card").classList.add("active");
+    document.getElementById("btn-card-speak").addEventListener("click", function () {
+      speakLearn(item.zi + "。" + item.words.join("，") + "。" + item.sen);
+    });
+    document.getElementById("btn-card-ok").addEventListener("click", function () {
+      document.getElementById("overlay-zika-card").classList.remove("active");
+      stopSpeak();
+    });
+  }
+
+  function startZikaReview() {
+    var got = ZI_BANK.filter(function (z) { return zika.collected[z.zi]; });
+    if (got.length < 3) {
+      toast("再收集几张生字卡，就可以复习啦。");
+      return;
+    }
+    shuffle(got);
+    var n = Math.min(4, got.length);
+    var pairs = got.slice(0, n);
+    zikaReview = { pairs: pairs, solved: {}, selectedZi: null, selectedPy: null, wrongs: 0 };
+    renderZikaReview();
+    document.getElementById("overlay-zika-review").classList.add("active");
+    speak("把字和读音连起来。");
+  }
+  function renderZikaReview() {
+    var r = zikaReview;
+    document.getElementById("review-prog").textContent = "把字和读音连起来　" + Object.keys(r.solved).length + " / " + r.pairs.length;
+    document.getElementById("review-fb").textContent = "";
+    var left = r.pairs.map(function (p, i) { return { id: String(i), side: "zi", html: escapeHtml(p.zi) }; });
+    var right = r.pairs.map(function (p, i) { return { id: String(i), side: "py", html: escapeHtml(p.py) }; });
+    shuffle(left);
+    shuffle(right);
+    var box = document.getElementById("review-pair");
+    box.innerHTML = "";
+    var col1 = document.createElement("div");
+    var col2 = document.createElement("div");
+    function mk(info) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "zika-match";
+      b.dataset.side = info.side;
+      b.dataset.id = info.id;
+      b.innerHTML = info.html;
+      if (r.solved[info.id]) b.classList.add("correct");
+      b.addEventListener("click", function () { onReviewTap(b); });
+      return b;
+    }
+    left.forEach(function (x) { col1.appendChild(mk(x)); });
+    right.forEach(function (x) { col2.appendChild(mk(x)); });
+    box.appendChild(col1);
+    box.appendChild(col2);
+  }
+  function onReviewTap(btn) {
+    if (!zikaReview || btn.classList.contains("correct")) return;
+    var side = btn.dataset.side;
+    var id = btn.dataset.id;
+    var box = document.getElementById("review-pair");
+    box.querySelectorAll('.zika-match[data-side="' + side + '"]:not(.correct)').forEach(function (el) {
+      el.classList.remove("selected");
+    });
+    btn.classList.add("selected");
+    if (side === "zi") zikaReview.selectedZi = id;
+    else zikaReview.selectedPy = id;
+    if (zikaReview.selectedZi && zikaReview.selectedPy) {
+      if (zikaReview.selectedZi === zikaReview.selectedPy) {
+        chime("ok");
+        zikaReview.solved[zikaReview.selectedZi] = true;
+        box.querySelectorAll('.zika-match[data-id="' + zikaReview.selectedZi + '"]').forEach(function (el) {
+          el.classList.add("correct");
+          el.classList.remove("selected");
+        });
+        zikaReview.selectedZi = null;
+        zikaReview.selectedPy = null;
+        document.getElementById("review-prog").textContent = "把字和读音连起来　" + Object.keys(zikaReview.solved).length + " / " + zikaReview.pairs.length;
+        if (Object.keys(zikaReview.solved).length === zikaReview.pairs.length) finishZikaReview();
+      } else {
+        chime("bad");
+        zikaReview.wrongs += 1;
+        var a = box.querySelector('.zika-match[data-side="zi"][data-id="' + zikaReview.selectedZi + '"]');
+        var b = box.querySelector('.zika-match[data-side="py"][data-id="' + zikaReview.selectedPy + '"]');
+        [a, b].forEach(function (el) {
+          if (!el) return;
+          el.classList.add("wrong");
+          setTimeout(function () { el.classList.remove("wrong", "selected"); }, 400);
+        });
+        zikaReview.selectedZi = null;
+        zikaReview.selectedPy = null;
+        document.getElementById("review-fb").textContent = "再想想～";
+        speakLearn("再想想");
+      }
+    }
+  }
+  function finishZikaReview() {
+    var r = zikaReview;
+    var stars = r.wrongs === 0 ? 3 : r.wrongs <= 2 ? 2 : 1;
+    if (stars > (zika.reviewBest || 0)) { zika.reviewBest = stars; saveZika(); }
+    var starHtml = "";
+    for (var i = 1; i <= 3; i++) starHtml += i <= stars ? "⭐" : "☆";
+    document.getElementById("review-prog").textContent = "都连上啦！";
+    document.getElementById("review-fb").className = "quiz-fb ok";
+    document.getElementById("review-fb").innerHTML = "复习完成 " + starHtml;
+    chime("win");
+    speak("都连上啦！得到" + stars + "颗星。");
+    var close = document.getElementById("btn-review-close");
+    close.textContent = "好的";
+  }
+  function hideZikaReview() {
+    document.getElementById("overlay-zika-review").classList.remove("active");
+    document.getElementById("review-fb").className = "quiz-fb";
+    document.getElementById("btn-review-close").textContent = "先回去";
+    zikaReview = null;
+    stopSpeak();
+  }
+
+  function bindLearnUi() {
+    var quizSkip = document.getElementById("btn-quiz-skip");
+    if (quizSkip) quizSkip.addEventListener("click", skipLearnQuiz);
+    document.getElementById("btn-learn-reward-ok").addEventListener("click", hideLearnReward);
+    document.getElementById("btn-zika").addEventListener("click", function () {
+      stopSpeak();
+      openZikaAlbum();
+    });
+    document.getElementById("btn-zika-back").addEventListener("click", function () {
+      stopSpeak();
+      hideZikaReview();
+      document.getElementById("overlay-zika-card").classList.remove("active");
+      if (state.introDone) { showScreen("screen-map"); updateMap(); }
+      else showScreen("screen-title");
+    });
+    document.getElementById("btn-zika-speech").addEventListener("click", toggleSpeech);
+    document.getElementById("btn-zika-review").addEventListener("click", startZikaReview);
+    document.getElementById("btn-review-close").addEventListener("click", hideZikaReview);
+    document.getElementById("overlay-zika-card").addEventListener("click", function (e) {
+      if (e.target.id === "overlay-zika-card") {
+        document.getElementById("overlay-zika-card").classList.remove("active");
+        stopSpeak();
+      }
+    });
+  }
+
+  function offerFishRetry(reason) {
+    offerLearnQuiz("maze", {
+      onGrant: function () {
+        if (typeof fishMisses === "number" && fishMisses > 0) {
+          fishMisses -= 1;
+          if (typeof renderFishHud === "function") renderFishHud();
+        }
+        window.__learnGranted = true;
+      }
+    });
+  }
+
+  window.__learnTest = {
+    startRetryQuiz: function () {
+      window.__learnGranted = false;
+      learnQuizUsed.maze = 0;
+      closeLearnQuiz(false);
+      offerLearnQuiz("maze", {
+        quiz: (function () {
+          var item = ziByChar("花") || ZI_BANK[0];
+          var q = buildQuiz(item, "zi");
+          q.mode = "py";
+          q.prompt = "这个字怎么读？";
+          q.speakText = item.zi;
+          q.choices = [{ text: item.py, ok: true }, { text: "yú", ok: false }, { text: "dēng", ok: false }];
+          return q;
+        })(),
+        onGrant: function () {
+          window.__learnGranted = true;
+          if (typeof fishMisses === "number" && fishMisses > 0) {
+            fishMisses -= 1;
+            if (typeof renderFishHud === "function") renderFishHud();
+          }
+        }
+      });
+    },
+    collectUntil: function (n, showReward) {
+      var i = 0;
+      while (countCollected() < n && i < ZI_BANK.length) {
+        collectZi(ZI_BANK[i].zi, "test");
+        i += 1;
+      }
+      if (showReward) showQueuedLearnReward(null);
+    },
+    openAlbum: function () { openZikaAlbum(); },
+    startReview: function () { startZikaReview(); },
+    state: function () {
+      return { collected: countCollected(), rewards: Object.assign({}, zika.rewards), titles: zika.titles.slice(), reviewBest: zika.reviewBest, granted: !!window.__learnGranted };
+    }
+  };
+
+
   /* ===== Init ===== */
   // iPhone/iPad：AudioContext 只能在用户点按时恢复；每次点按都顺手唤醒一下（被来电/切后台打断后也能恢复）
   function wakeAudio() {
@@ -5653,6 +6619,9 @@
   window.addEventListener("pagehide", function () { stopShake(); });
 
   function leaveLevel() {
+    closeLearnQuiz(true);
+    document.getElementById("overlay-zika-card").classList.remove("active");
+    hideZikaReview();
     clearTimeout(petalHintTimer);
     stopFishing();
     stopFlowerWind();
@@ -5663,7 +6632,7 @@
   }
 
   function resetGame() {
-    if (!window.confirm("真的要重新开始吗？人物卡和故事会先收起来。")) return;
+    if (!window.confirm("真的要重新开始吗？人物卡和故事会先收起来。生字卡还会留着。")) return;
     var speechOn = state.speech;
     state = emptyState();
     state.speech = speechOn;
@@ -5730,6 +6699,7 @@
   document.getElementById("btn-petal-hint").addEventListener("click", function () { showPetalHint(false); });
 
   bindFishControls();
+  bindLearnUi();
 
   document.querySelectorAll(".spot-btn").forEach(function (btn) {
     btn.addEventListener("click", function () { enterLevel(btn.dataset.level); });
