@@ -1639,7 +1639,14 @@
     .bobber-float { width: 100%; height: 100%; clip-path: inset(0 0 20% 0); transition: transform 0.15s; }
     .bobber-float svg { width: 100%; height: 100%; display: block; }
     .bobber-ring { position: absolute; left: 50%; bottom: 16%; width: 180%; height: 28%; transform: translate(-50%, 50%); border: 2px solid rgba(255,255,255,0.75); border-radius: 50%; }
-    .bobber.nibble .bobber-float { animation: bobNibble 0.42s ease-in-out infinite; }
+    .bobber.nibble .bobber-float { animation: none; }
+    .bobber.nibble.tap .bobber-float { animation: bobTap 0.34s ease-in-out 1; }
+    @keyframes bobTap { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(16%); } }
+    .bobber.bite.plunge .bobber-float { animation: bobPlunge 0.3s ease-out 1, bobBite 0.5s 0.3s ease-in-out infinite alternate; }
+    @keyframes bobPlunge { 0% { transform: translateY(0); } 60% { transform: translateY(70%); } 100% { transform: translateY(40%); } }
+    .btn-recall.nudge { animation: recallNudge 0.9s ease-in-out 3; border-color: var(--zhu); }
+    @keyframes recallNudge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); box-shadow: 0 0 0 5px rgba(255,210,110,0.7); } }
+    @media (prefers-reduced-motion: reduce) { .bobber.nibble.tap .bobber-float, .bobber.bite.plunge .bobber-float, .btn-recall.nudge { animation: none; } .bobber.bite.plunge .bobber-float { transform: translateY(40%); } }
     @keyframes bobNibble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(12%); } }
     .bobber.bite .bobber-float { transform: translateY(38%); clip-path: inset(0 0 56% 0); animation: bobBite 0.5s ease-in-out infinite alternate; }
     @keyframes bobBite { from { transform: translateY(30%); } to { transform: translateY(44%); } }
@@ -2665,6 +2672,9 @@
     var t = escapeHtml(fillName(s));
     var pairs = [
       ["通灵宝玉", "<ruby>通灵宝玉<rt>tōng líng bǎo yù</rt></ruby>"],
+      ["吓跑", "<ruby>吓<rt>xià</rt></ruby>跑"],
+      ["溜走", "<ruby>溜<rt>liū</rt></ruby>走"],
+      ["浮漂", "浮<ruby>漂<rt>piāo</rt></ruby>"],
       ["潇湘馆", "<ruby>潇湘馆<rt>xiāo xiāng guǎn</rt></ruby>"],
       ["怡红院", "<ruby>怡红院<rt>yí hóng yuàn</rt></ruby>"],
       ["会芳园", "<ruby>会芳园<rt>huì fāng yuán</rt></ruby>"],
@@ -2887,7 +2897,7 @@
     mazeBefore: [
       { who: "baoyu", bg: "redcourt", text: "{name}！你来得正好。我把院子找了一遍，还是没有玉。可是荷塘里，有一点点亮光。" },
       { who: "baoyu", bg: "redcourt", text: "上次我和姐姐们在这儿钓过鱼。我们也来钓鱼吧！说不定能把亮亮的东西钓上来。" },
-      { who: "baoyu", bg: "redcourt", text: "手指按住水面，往上一甩，就能抛竿。浮漂一沉，出现“！”，就往上一提！" },
+      { who: "baoyu", bg: "redcourt", text: "看准小鱼，往鱼旁边抛竿。浮漂轻轻动，是鱼在试探，先别急；浮漂一沉，出现“！”，就快往上一提！" },
       { who: "baoyu", bg: "redcourt", text: "鱼会往两边跑。手指左右拖，让鱼竿跟着鱼。鱼累了，再往上一提，收竿！先钓三条红鲤鱼，两条金鱼！" }
     ],
     mazeAfter: [
@@ -3696,6 +3706,8 @@
     fishFailTaps = 0;
     fishTapCast = false;
     fishPreferred = null;
+    fishWait = null;
+    fishLandedN = 0;
     var old = fishEl("fish-stars-card");
     if (old) old.remove();
     var pond = fishEl("fish-pond");
@@ -3839,7 +3851,8 @@
     if (!fishActive()) { fishRaf = 0; return; }
     var dt = fishLastT ? Math.min(0.05, (t - fishLastT) / 1000) : 0.016;
     fishLastT = t;
-    fishList.forEach(function (o) { moveFish(o, dt); });
+    fishList.forEach(function (o) { if (o.scaredT > 0) o.scaredT -= dt; moveFish(o, dt); });
+    if (fishPhase === "wait" && fishWait && fishBobber && !fishBoxMode && !fishCast && !fishRecall) tickWait(dt);
     if (fishReel) {
       if (fishPhase === "fight") tickFight(dt);
       else if (fishPhase === "tired") tickTired(dt);
@@ -3894,7 +3907,7 @@
     switch (fishPhase) {
       case "bite": case "tired": beginAim(e, p); break;
       case "fight": beginAim(e, p); steerTo(p); break;
-      case "nibble": toast("还没咬钩呢。等“！”出来再提。"); break;
+      case "nibble": beginAim(e, p); break;
       case "catch": dismissCatch(); break;
       case "idle": case "wait": case "come": beginAim(e, p); break;
     }
@@ -3908,6 +3921,8 @@
   var fishFailTaps = 0;
   var fishTapCast = false;   // 小手甩不动时，点一下也能抛
   var fishPreferred = null;
+  var fishWait = null;       // 浮漂在水里等鱼：{t, checkT, hinted, guided}
+  var fishLandedN = 0;       // 已经钓上来几样（第一条当教学，简单些）
   var fishHandTimer = null;
 
   function rodBase() { return { x: fishW * 0.6 + 16 * fishScale, y: fishH - nearBankH() * 0.55 }; }
@@ -3979,6 +3994,7 @@
     while (fishAim.pts.length > 2 && now - fishAim.pts[0].t > 140) fishAim.pts.shift();
     var up = fishAim.y0 - p.y, mdx = p.x - fishAim.x0;
     if (fishPhase === "fight") { steerTo(p); return; }
+    if (fishPhase === "nibble" && fishAim.phase === "nibble" && up >= 28 && up >= Math.abs(mdx) * 0.5) { fishAim = null; scareFish(); return; }
     if ((fishPhase === "bite" || fishPhase === "tired") && up >= 28 && up >= Math.abs(mdx) * 0.5) {
       fishAim = null;
       fishFailTaps = 0;
@@ -4001,6 +4017,12 @@
     if (fishReel) fishReel.dragging = false;
     if (e && e.type === "pointercancel") return;
     if (e && e.changedTouches) { var p0 = pondPoint(e); a.x = p0.x; a.y = p0.y; }
+    if (fishActive() && fishPhase === "nibble") {
+      if (a.phase !== "nibble") return;
+      if (a.y0 - a.y >= 28) { scareFish(); return; }
+      toast("还没咬住呢。等浮漂沉下去，再提。");
+      return;
+    }
     if (fishActive() && (fishPhase === "bite" || fishPhase === "tired")) {
       if (a.phase !== fishPhase) return;   // 比如遛鱼时按着的手指，鱼累了以后才松开
       var isBite = fishPhase === "bite";
@@ -4135,19 +4157,73 @@
       }
       return;
     }
-    // 落在小鱼旁边：那条鱼会很快游过来
-    var R = Math.max(90, fishW * 0.22), best = null, bd = 1e9, anyNear = false;
+    // 鱼钩要落在鱼旁边，鱼才会来；落在没鱼的地方要等，可能等不到
+    fishPreferred = null;
+    fishWait = { t: 0, checkT: 0.5, hinted: false, guided: false, aimed: null };
+    var R = fishAttractR() * 1.15, near = null, bd = 1e9;
     fishList.forEach(function (o) {
       if (o.state !== "swim") return;
-      var d = Math.sqrt((o.x - x) * (o.x - x) + (o.y - y) * (o.y - y));
-      if (d < R) anyNear = true;
-      if (d < R && (needKind(o.kind) || o.kind === "star") && d < bd) { bd = d; best = o; }
+      var d = Math.hypot(o.x - x, o.y - y);
+      if (d < R && d < bd) { bd = d; near = o; }
     });
-    fishPreferred = best;
-    if (best) cheer("正好在" + FISH_KINDS[best.kind].name + "旁边！");
-    setFishTip("等一等……浮漂沉下去、出现“！”，就往上一提。");
-    var delay = fishBites === 0 ? 800 : best ? rand(600, 1000) : anyNear ? rand(1100, 1800) : rand(1800, 2900);
-    fishLater(chooseBiter, delay);
+    fishWait.aimed = near;
+    if (near) cheer("正好在" + FISH_KINDS[near.kind].name + "旁边！");
+    setFishTip("等一等……浮漂轻轻动，先别急；浮漂沉下去、出现“！”，再往上一提。");
+  }
+  function fishTutorial() { return fishLandedN === 0; }
+  function fishAttractR() { return Math.max(62, 78 * fishScale) * (fishTutorial() ? 1.6 : 1); }
+  function tickWait(dt) {
+    var w = fishWait;
+    w.t += dt;
+    w.checkT -= dt;
+    if (w.checkT > 0) return;
+    w.checkT = 0.3;
+    var bx = fishBobber.x, by = fishBobber.y, R = fishAttractR();
+    var inR = [], curious = [];
+    fishList.forEach(function (o) {
+      if (o.state !== "swim" || (o.scaredT || 0) > 0) return;
+      var d = Math.hypot(o.x - bx, o.y - by);
+      if (d < R) inR.push(o);
+      else if (d < R * 1.6) curious.push(o);
+    });
+    // 抛在鱼旁边：那条鱼很快就来
+    var am = w.aimed;
+    if (am && am.state === "swim" && !(am.scaredT > 0) && Math.hypot(am.x - bx, am.y - by) < R * 1.35) {
+      if (Math.random() < (fishTutorial() ? 0.9 : 0.6)) { attractFish(am); return; }
+    } else if (inR.length) {
+      // 别的鱼路过：偶尔才会停下来咬（抛得远就要多等，可能等不到）
+      var want = inR.filter(function (o) { return needKind(o.kind) || (o.kind === "star" && !fishBonus && caughtTargets() >= 1); });
+      var pool = want.length ? want : inR;
+      var ch = fishTutorial() ? 0.9 : w.t < 2.5 ? 0 : 0.045;
+      if (Math.random() < ch) { attractFish(pool[Math.floor(Math.random() * pool.length)]); return; }
+    }
+    // 教学时，附近的鱼会好奇地游过来看看
+    if (fishTutorial()) curious.forEach(function (o) {
+      if (Math.random() < 0.08) { o.tx = bx + rand(-0.5, 0.5) * R; o.ty = by + rand(-0.4, 0.4) * R; }
+    });
+    // 第一条（教学）：等一会儿，就让一条要钓的鱼游过来
+    if (fishTutorial() && !w.guided && w.t > 3.5) {
+      w.guided = true;
+      var need = fishList.filter(function (o) { return o.state === "swim" && needKind(o.kind); });
+      if (need.length) { var g = nearestFish(need); g.tx = bx; g.ty = by; }
+    }
+    if (!w.hinted && w.t > 8) {
+      w.hinted = true;
+      setFishTip("这里好像没有鱼，换个地方抛竿吧。点“收竿”，或者直接再甩一竿。");
+      cheer("鱼在别的地方呢！");
+      toast("这里好像没有鱼，换个地方抛竿吧");
+      var rb = fishEl("btn-recall");
+      if (rb) { rb.classList.remove("nudge"); void rb.offsetWidth; rb.classList.add("nudge"); }
+      if (!fishSaid.noFish) { fishSaid.noFish = true; speak("这里好像没有鱼，换个地方抛竿吧。"); }
+    }
+  }
+  function attractFish(o) {
+    fishBites++;
+    if ((fishBites === 3 || fishBites === 7 || fishBites === 11) && fishSurpriseIdx < FISH_SURPRISES.length) {
+      startBite({ surprise: FISH_SURPRISES[fishSurpriseIdx++] });
+      return;
+    }
+    comeToBobber(o);
   }
   function reelBack(msg) {
     sendBiterAway(false);
@@ -4206,6 +4282,7 @@
 
   function setFishPhase(p) {
     if (p !== "fight") stopShake();
+    if (p !== "wait" && p !== "come") { var rb0 = fishEl("btn-recall"); if (rb0) rb0.classList.remove("nudge"); }
     fishPhase = p;
     var pond = fishEl("fish-pond");
     if (pond) pond.setAttribute("data-phase", p);
@@ -4263,7 +4340,7 @@
   }
   function bobberState(cls) {
     if (!fishBobber) return;
-    fishBobber.el.classList.remove("nibble", "bite", "reeling");
+    fishBobber.el.classList.remove("nibble", "bite", "reeling", "tap", "plunge");
     if (cls) fishBobber.el.classList.add(cls);
   }
 
@@ -4271,7 +4348,7 @@
 
   /* ---- 震动：安卓用 navigator.vibrate；iPhone 只能在孩子真的点下去那一下“嗒”一声 ---- */
   var HAPTIC_KEY = "honglou-haptics-on";
-  var HAPTIC_PATTERNS = { bite: [70, 60, 70], hook: 30, "catch": [40, 50, 40, 50, 90], box: [30, 40, 30, 40, 220], on: 40, cast: 25, pull: [25, 40, 25], strain: 15, tired: [40, 60, 40] };
+  var HAPTIC_PATTERNS = { bite: [70, 60, 70], hook: 30, "catch": [40, 50, 40, 50, 90], box: [30, 40, 30, 40, 220], on: 40, cast: 25, pull: [25, 40, 25], strain: 15, tired: [40, 60, 40], nibble: 18 };
   function hapticsOn() {
     try { return localStorage.getItem(HAPTIC_KEY) !== "0"; } catch (e) { return true; }
   }
@@ -4363,39 +4440,102 @@
   function startNibble() {
     setFishPhase("nibble");
     bobberState("nibble");
-    setFishTip("有动静！再等一下……");
-    fishLater(function () { if (fishPhase === "nibble") startBiteWindow(); }, fishBiter && fishBiter.kind ? rand(900, 1500) : 900);
+    var wb = fishBiter || {};
+    var n = wb.box || wb.surprise ? 1 : fishTutorial() ? 1 + Math.floor(Math.random() * 2) : 1 + Math.floor(Math.random() * 3);
+    fishNibbleLeft = n;
+    setFishTip("有动静！小鱼在试探，先别提……");
+    if (!fishSaid.nibble) { fishSaid.nibble = true; speak("浮漂轻轻动，是小鱼在试探。先别急！"); }
+    fishLater(nibbleTap, rand(450, 750));
+  }
+  var fishNibbleLeft = 0;
+  function nibbleTap() {
+    if (fishPhase !== "nibble" || !fishBobber) return;
+    var el = fishBobber.el;
+    el.classList.remove("tap"); void el.offsetWidth; el.classList.add("tap");
+    haptic("nibble");
+    tickSound();
+    ripple(fishBobber.x, fishBobber.y);
+    if (fishBiter && fishBiter.kind) fishBiter.ph += 2;
+    fishNibbleLeft--;
+    var ui = fishEl("fish-pond");
+    if (ui) ui.setAttribute("data-nibbles", String(fishNibbleLeft));
+    if (fishNibbleLeft > 0) fishLater(nibbleTap, rand(650, 1100));
+    else fishLater(function () { if (fishPhase === "nibble") startBiteWindow(); }, rand(600, 1000));
+  }
+  function tickSound() {
+    if (typeof fxSoundOn === "function" && !fxSoundOn()) return;
+    try {
+      var ctx = getAudio();
+      if (!ctx) return;
+      var now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(880, now); o.frequency.exponentialRampToValueAtTime(520, now + 0.08);
+      g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(0.035, now + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+      o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.12);
+    } catch (e) {}
+  }
+  function biteWindowMs() {
+    var b = fishBiter || {};
+    if (fishTutorial() && !b.box) return 1700;
+    if (b.box) return 1500;
+    if (b.surprise) return 1300;
+    return 950;
   }
   function startBiteWindow() {
     setFishPhase("bite");
     haptic("bite");
     setHapticTap(true);
     bobberState("bite");
+    if (fishBobber) { var el = fishBobber.el; el.classList.remove("plunge"); void el.offsetWidth; el.classList.add("plunge"); }
     if (fishBiter && fishBiter.kind) fishBiter.state = "bite";
     plop(true);
     ripple(fishBobber.x, fishBobber.y);
-    setFishTip("咬钩啦！往上一提！");
+    setFishTip("咬钩啦！快往上一提！");
     if (!fishSaid.hooked) showCastHand(1600);
     if (!fishSaid.bite) { fishSaid.bite = true; speak("咬钩啦！往上一提！"); }
-    fishLater(function () { if (fishPhase === "bite") missBite(); }, FISH_BITE_WINDOW);
+    var ms = biteWindowMs();
+    var pond = fishEl("fish-pond");
+    if (pond) pond.setAttribute("data-window", String(ms));
+    fishLater(function () { if (fishPhase === "bite") missBite(); }, ms);
   }
   function sendBiterAway(isMiss) {
-    if (fishBiter && fishBiter.kind) { fishBiter.state = "flee"; fishBiter.boost = 1; pickWander(fishBiter); }
+    if (fishBiter && fishBiter.kind) { fishBiter.state = "flee"; fishBiter.boost = 1; fishBiter.scaredT = isMiss ? 3.5 : 0; pickWander(fishBiter); }
     fishBiter = null;
     clearFishTimers();
+  }
+  function backToWait(tip) {
+    if (!fishBobber) { setFishPhase("idle"); afterRecall(); return; }
+    bobberState("");
+    if (fishBobber) fishBobber.el.classList.remove("tap", "plunge");
+    setFishPhase("wait");
+    fishWait = { t: 0, checkT: 1.2, hinted: false, guided: true, aimed: null };
+    setFishTip(tip);
+  }
+  function scareFish() {
+    // 小鱼还在试探就提竿：鱼吓跑了
+    setHapticTap(false);
+    var wasBox = fishBiter && fishBiter.box;
+    if (!fishTutorial()) fishMisses++;
+    sendBiterAway(true);
+    splash(fishBobber.x, fishBobber.y);
+    rodState.pull = -0.2;
+    toast("太急了，鱼吓跑了");
+    cheer("慢慢来，等它咬住！");
+    if (!fishSaid.scare) { fishSaid.scare = true; speak("太急了，鱼吓跑了。浮漂沉下去，再提。"); }
+    renderFishHud();
+    if (wasBox) { reelBack("太急了！往亮光那边，再甩一竿。"); return; }
+    backToWait("太急了，鱼吓跑了。浮漂轻轻动先别提，沉下去再提！");
   }
   function missBite() {
     setHapticTap(false);
     fishMisses++;
     var wasBox = fishBiter && fishBiter.box;
     sendBiterAway(true);
-    bobberState("");
-    setFishPhase("wait");
-    toast("差一点！再试试。");
+    toast("慢了一点，鱼溜走了");
     cheer("没关系，再来！");
-    if (!fishSaid.miss) { fishSaid.miss = true; speak("差一点！再试试。"); }
+    if (!fishSaid.miss) { fishSaid.miss = true; speak("慢了一点，鱼溜走了。下次浮漂一沉，就快提！"); }
     renderFishHud();
-    reelBack(wasBox ? "差一点！往亮光那边，再甩一竿。" : "小鱼游走了。往上一甩，再抛一竿！");
+    if (wasBox) { reelBack("慢了一点！往亮光那边，再甩一竿。"); return; }
+    backToWait("慢了一点，鱼溜走了。再等等，或者换个地方抛竿。");
   }
 
   /* ---- 提竿 → 遛鱼（左右跟着鱼）→ 鱼累了 → 收竿 ---- */
@@ -4534,6 +4674,12 @@
     if (kid) kid.style.transform = "";
     if (ui) ui.removeAttribute("data-shake");
   }
+  function fightSpec(kind) {
+    var b = FISH_FIGHT[kind], n = fishLandedN;
+    if (n === 0) return { speed: b.speed * 0.85, drain: b.drain * 1.25, rise: b.rise * 0.85, turn: [b.turn[0] * 1.15, b.turn[1] * 1.15] };
+    var k = Math.min(1.28, 1 + 0.06 * n);   // 越往后越有劲，但封顶
+    return { speed: b.speed * k, drain: b.drain / (1 + (k - 1) * 0.8), rise: b.rise * (1 + (k - 1) * 0.7), turn: [b.turn[0] / (1 + (k - 1) * 0.6), b.turn[1] / (1 + (k - 1) * 0.6)] };
+  }
   function hookFish() {
     clearFishTimers();
     // label 要留到这次点击的 click 发生之后再收起，否则 iPhone 的“嗒”不会响
@@ -4544,7 +4690,7 @@
     fishSaid.hooked = true;
     rodState.pull = -0.25;
     var o = fishBiter && fishBiter.kind ? fishBiter : null;
-    var spec = o ? FISH_FIGHT[o.kind] : null;
+    var spec = o ? fightSpec(o.kind) : null;
     fishReel = { o: o, spec: spec, dir: o ? (Math.random() < 0.5 ? -1 : 1) : 1, turnT: spec ? rand(spec.turn[0], spec.turn[1]) * 0.6 : 0,
       stamina: 1, tension: 0.15, aimTarget: null, aligned: true, near: true, trailT: 0, t: 0, strainT: 0, y0: o ? o.y : 0, dragT: 0, pullT: 0 };
     bobberState("reeling");
@@ -4753,6 +4899,7 @@
 
   function landCatch() {
     var what = fishBiter;
+    if (!(what && what.box)) fishLandedN++;
     setHapticTap(false);
     fishReel = null;
     fishHolding = false;
@@ -4859,7 +5006,7 @@
   }
 
   function fishStarCount() {
-    var n = fishMisses <= 2 ? 3 : fishMisses <= 5 ? 2 : 1;
+    var n = fishMisses <= 3 ? 3 : fishMisses <= 6 ? 2 : 1;
     if (fishBonus) n++;
     return Math.min(3, n);
   }
@@ -4920,13 +5067,26 @@
       }
       if (fishPhase === "idle") showCastHand(3500);
     } else if (fishPhase === "wait" || fishPhase === "come") {
-      if (fishPhase === "wait") { clearFishTimers(); chooseBiter(); }
-      if (fishBiter && fishBiter.kind) { fishBiter.boost = 1.8; ringAt(fishBiter.x, fishBiter.y, fishBiter); }
-      else if (fishBobber) ringAt(fishBobber.x, fishBobber.y);
-      say = "小鱼要来咬钩了。出现“！”，就往上一提。";
+      if (fishPhase === "come" && fishBiter && fishBiter.kind) {
+        fishBiter.boost = 1.8; ringAt(fishBiter.x, fishBiter.y, fishBiter);
+        say = "小鱼游过来了。浮漂轻轻动先别提，沉下去再提！";
+      } else {
+        var R2 = fishAttractR() * 2, bx = fishBobber.x, by = fishBobber.y;
+        var close = fishList.filter(function (o) { return o.state === "swim" && Math.hypot(o.x - bx, o.y - by) < R2; });
+        if (close.length) {
+          var c = nearestFish(close); c.tx = bx; c.ty = by; c.scaredT = 0;
+          ringAt(c.x, c.y, c);
+          say = "旁边有鱼，再等一等。浮漂沉下去，再往上一提。";
+        } else {
+          var need2 = fishList.filter(function (o) { return o.state === "swim" && needKind(o.kind); });
+          var t2 = need2[0] || fishList[0];
+          if (t2) ringAt(t2.x, t2.y, t2);
+          say = "这里没有鱼。点“收竿”，往鱼那边再甩一竿！";
+        }
+      }
     } else if (fishPhase === "nibble") {
       ringAt(fishBobber.x, fishBobber.y);
-      say = "快了！等“！”出来，再往上一提。";
+      say = "小鱼在试探，先别提！等浮漂沉下去、出现“！”，再提。";
     } else if (fishPhase === "bite") {
       say = "现在！往上一提！";
       showCastHand(1500);
